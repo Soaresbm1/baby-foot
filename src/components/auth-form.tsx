@@ -57,7 +57,7 @@ export function AuthForm({ nextPath }: { nextPath: string }) {
         ))}
       </div>
 
-      <form className="mt-5 space-y-4" onSubmit={submit}>
+      <form className="mt-5 space-y-4" method="post" onSubmit={submit}>
         {mode === "signup" ? (
           <label className="block text-sm font-bold">
             Nom affiché
