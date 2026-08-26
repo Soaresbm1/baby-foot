@@ -170,4 +170,3 @@ export function LoginForm({ nextPath }: LoginFormProps) {
     </div>
   );
 }
-

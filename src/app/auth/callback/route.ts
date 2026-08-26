@@ -19,4 +19,3 @@ export async function GET(request: NextRequest) {
   loginUrl.searchParams.set("next", nextPath);
   return NextResponse.redirect(loginUrl);
 }
-

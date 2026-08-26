@@ -6,4 +6,3 @@ export async function POST(request: Request) {
   await (await createClient()).auth.signOut();
   return NextResponse.redirect(new URL("/login", request.url), 303);
 }
-

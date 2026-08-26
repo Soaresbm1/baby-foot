@@ -12,4 +12,3 @@ export function safeRedirectPath(value: string | null | undefined): string {
     return DEFAULT_REDIRECT;
   }
 }
-
