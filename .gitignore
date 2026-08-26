@@ -15,7 +15,6 @@
 # Local configuration
 .env*
 !.env.example
-/supabase/.temp/
 
 # Editors and operating systems
 .DS_Store
@@ -24,3 +23,4 @@
 # TypeScript
 *.tsbuildinfo
 next-env.d.ts
+

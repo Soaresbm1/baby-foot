@@ -1,17 +1,8 @@
 import Link from "next/link";
 
 import { MenuLink } from "@/components/menu-link";
-import { createClient } from "@/lib/supabase/server";
 
-export default async function HomePage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const { data: profile } = user
-    ? await supabase.from("profiles").select("display_name").eq("id", user.id).single()
-    : { data: null };
-
+export default function HomePage() {
   return (
     <div className="flex min-h-[calc(100dvh-5rem)] flex-col">
       <header className="mb-10 flex items-center justify-between">
@@ -19,19 +10,14 @@ export default async function HomePage() {
           <p className="text-sm font-bold uppercase tracking-[0.22em] text-[var(--accent)]">
             Baby-foot
           </p>
-          <h1 className="mt-2 text-3xl font-black tracking-tight">
-            Prêt à jouer{profile?.display_name ? `, ${profile.display_name}` : ""} ?
-          </h1>
+          <h1 className="mt-2 text-3xl font-black tracking-tight">Prêt à jouer ?</h1>
         </div>
-        <form action="/auth/signout" method="post">
-          <button
-            className="grid size-12 place-items-center rounded-full bg-[var(--surface-raised)] text-lg text-[var(--muted)]"
-            aria-label="Se déconnecter"
-            title="Se déconnecter"
-          >
-            ↗
-          </button>
-        </form>
+        <div
+          aria-hidden="true"
+          className="grid size-12 place-items-center rounded-full bg-[var(--surface-raised)] text-2xl"
+        >
+          ⚽
+        </div>
       </header>
 
       <section className="space-y-4" aria-label="Actions de match">
@@ -55,3 +41,4 @@ export default async function HomePage() {
     </div>
   );
 }
+
