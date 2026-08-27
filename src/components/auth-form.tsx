@@ -26,7 +26,10 @@ export function AuthForm({ nextPath }: { nextPath: string }) {
       : await supabase.auth.signUp({
           email,
           password,
-          options: { data: { full_name: displayName } },
+          options: {
+            data: { full_name: displayName },
+            emailRedirectTo: `${window.location.origin}${nextPath}`,
+          },
         });
 
     setBusy(false);

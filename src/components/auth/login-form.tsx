@@ -16,7 +16,7 @@ const AUTH_MESSAGES: Record<string, string> = {
 };
 
 function friendlyAuthError(message: string) {
-  return AUTH_MESSAGES[message] ?? "Connexion impossible pour le moment. Réessayez.";
+  return AUTH_MESSAGES[message] ?? `Connexion impossible : ${message}`;
 }
 
 export function LoginForm({ nextPath }: LoginFormProps) {
@@ -45,7 +45,7 @@ export function LoginForm({ nextPath }: LoginFormProps) {
             email,
             password,
             options: {
-              data: { display_name: displayName },
+              data: { full_name: displayName },
               emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTo)}`,
             },
           });
@@ -107,7 +107,7 @@ export function LoginForm({ nextPath }: LoginFormProps) {
         <span className="h-px flex-1 bg-[var(--surface-raised)]" />
       </div>
 
-      <form onSubmit={handleCredentials} className="space-y-4">
+      <form method="post" onSubmit={handleCredentials} className="space-y-4">
         {mode === "signup" ? (
           <label className="block text-sm font-bold">
             Nom affiché
