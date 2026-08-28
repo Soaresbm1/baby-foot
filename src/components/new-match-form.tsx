@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 
+import { InviteQrCode } from "@/components/invite-qr-code";
 import { createClient } from "@/lib/supabase/client";
 
 type CreatedMatch = { match_id: string; join_token: string };
@@ -35,6 +36,8 @@ export function NewMatchForm() {
       <section className="mt-8 rounded-3xl bg-[var(--surface)] p-5">
         <p className="text-sm font-bold uppercase tracking-wider text-[var(--accent)]">Match créé</p>
         <h2 className="mt-2 text-2xl font-black">Invite ton adversaire</h2>
+        <InviteQrCode value={inviteUrl} />
+        <p className="mt-3 text-center text-sm text-[var(--muted)]">Fais scanner ce code par ton adversaire.</p>
         <p className="mt-2 break-all text-sm text-[var(--muted)]">{inviteUrl}</p>
         <button type="button" onClick={() => navigator.clipboard.writeText(inviteUrl)} className="mt-5 min-h-12 w-full rounded-2xl bg-[var(--surface-raised)] px-4 font-bold">Copier le lien</button>
         <a href={`/match/${created.match_id}`} className="mt-3 flex min-h-14 items-center justify-center rounded-2xl bg-[var(--accent)] px-4 font-black text-[#102006]">Ouvrir le match</a>
