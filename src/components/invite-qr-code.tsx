@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
@@ -8,7 +8,7 @@ export function InviteQrCode({ value }: { value: string }) {
   const [source, setSource] = useState<string>();
   useEffect(() => {
     let active = true;
-    void QRCode.toDataURL(value, { color: { dark: "#07120e", light: "#ffffff" }, errorCorrectionLevel: "M", margin: 2, width: 320 })
+    void QRCode.toDataURL(value, { color: { dark: "#0b0b0d", light: "#ffffff" }, errorCorrectionLevel: "M", margin: 2, width: 320 })
       .then((url) => { if (active) setSource(url); });
     return () => { active = false; };
   }, [value]);

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -18,5 +18,5 @@ export function ReadyButton({ matchId, initialReady }: { matchId: string; initia
     if (!error) { setReady(next); router.refresh(); }
   }
 
-  return <button onClick={toggle} disabled={busy} className="mt-6 min-h-16 w-full rounded-2xl bg-[var(--accent)] px-5 text-lg font-black text-[#102006] disabled:opacity-60">{ready ? "Je ne suis plus prêt" : "Je suis prêt"}</button>;
+  return <button onClick={toggle} disabled={busy} className="mt-6 min-h-16 w-full rounded-2xl bg-[var(--accent)] px-5 text-lg font-black text-[var(--accent-contrast)] disabled:opacity-60">{ready ? "Je ne suis plus prêt" : "Je suis prêt"}</button>;
 }

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
@@ -53,7 +53,7 @@ export function QrCodeScanner() {
       {active ? <div aria-hidden="true" className="pointer-events-none absolute inset-[15%] rounded-3xl border-2 border-[var(--accent)] shadow-[0_0_0_999px_rgb(0_0_0_/_25%)]" /> : null}
     </div>
     {error ? <p role="alert" className="mt-4 text-sm text-red-300">{error}</p> : null}
-    {!active ? <button type="button" onClick={start} disabled={starting} className="mt-5 min-h-14 w-full rounded-2xl bg-[var(--accent)] px-5 font-black text-[#102006] disabled:opacity-60">{starting ? "Ouverture…" : "Ouvrir la caméra"}</button>
+    {!active ? <button type="button" onClick={start} disabled={starting} className="mt-5 min-h-14 w-full rounded-2xl bg-[var(--accent)] px-5 font-black text-[var(--accent-contrast)] disabled:opacity-60">{starting ? "Ouverture…" : "Ouvrir la caméra"}</button>
       : <button type="button" onClick={stop} className="mt-5 min-h-12 w-full rounded-2xl bg-[var(--surface-raised)] px-5 font-bold">Fermer la caméra</button>}
     <label className="mt-3 flex min-h-12 cursor-pointer items-center justify-center rounded-2xl bg-[var(--surface-raised)] px-5 text-sm font-bold">Choisir une photo du QR code<input type="file" accept="image/*" onChange={scanImage} className="sr-only" /></label>
   </section>;

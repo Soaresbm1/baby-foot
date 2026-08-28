@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { ProfileForm } from "@/components/profile-form";
@@ -45,7 +45,7 @@ export default async function ProfilePage() {
       <header className="mt-10 flex items-center gap-5">
         <div
           aria-label={`Avatar de ${profile.display_name}`}
-          className="grid size-20 shrink-0 place-items-center rounded-full bg-[var(--accent)] bg-cover bg-center text-2xl font-black text-[#102006]"
+          className="grid size-20 shrink-0 place-items-center rounded-full bg-[var(--accent)] bg-cover bg-center text-2xl font-black text-[var(--accent-contrast)]"
           style={profile.avatar_url ? { backgroundImage: `url(${JSON.stringify(profile.avatar_url)})` } : undefined}
         >
           {profile.avatar_url ? <span className="sr-only">{initials(profile.display_name)}</span> : initials(profile.display_name)}

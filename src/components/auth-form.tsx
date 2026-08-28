@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
@@ -76,7 +76,7 @@ export function AuthForm({ nextPath }: { nextPath: string }) {
           <input name="password" required type="password" minLength={6} autoComplete={mode === "login" ? "current-password" : "new-password"} className="mt-2 min-h-12 w-full rounded-2xl bg-[var(--surface-raised)] px-4 font-normal outline-none" />
         </label>
         {message ? <p role="status" className="rounded-2xl bg-[var(--background)] p-3 text-sm text-[var(--muted)]">{message}</p> : null}
-        <button disabled={busy} className="min-h-14 w-full rounded-2xl bg-[var(--accent)] px-5 font-black text-[#102006] disabled:opacity-60">
+        <button disabled={busy} className="min-h-14 w-full rounded-2xl bg-[var(--accent)] px-5 font-black text-[var(--accent-contrast)] disabled:opacity-60">
           {busy ? "Patiente…" : mode === "login" ? "Se connecter" : "Créer mon compte"}
         </button>
       </form>

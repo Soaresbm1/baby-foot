@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, type FormEvent } from "react";
 
@@ -41,7 +41,7 @@ export function NewMatchForm() {
         <p className="mt-3 text-center text-sm text-[var(--muted)]">{created.mode === "two_v_two" ? "Les trois joueurs utilisent le même QR code." : "Fais scanner ce code par ton adversaire."}</p>
         <p className="mt-2 break-all text-sm text-[var(--muted)]">{inviteUrl}</p>
         <button type="button" onClick={() => navigator.clipboard.writeText(inviteUrl)} className="mt-5 min-h-12 w-full rounded-2xl bg-[var(--surface-raised)] px-4 font-bold">Copier le lien</button>
-        <a href={`/match/${created.match_id}`} className="mt-3 flex min-h-14 items-center justify-center rounded-2xl bg-[var(--accent)] px-4 font-black text-[#102006]">Ouvrir le match</a>
+        <a href={`/match/${created.match_id}`} className="mt-3 flex min-h-14 items-center justify-center rounded-2xl bg-[var(--accent)] px-4 font-black text-[var(--accent-contrast)]">Ouvrir le match</a>
       </section>
     );
   }
@@ -53,11 +53,11 @@ export function NewMatchForm() {
         <div className="mt-4 grid grid-cols-2 gap-3">
           <label className="cursor-pointer">
             <input className="peer sr-only" type="radio" name="mode" value="one_v_one" defaultChecked />
-            <span className="flex min-h-20 flex-col items-center justify-center rounded-2xl bg-[var(--surface-raised)] font-black peer-checked:bg-[var(--accent)] peer-checked:text-[#102006]"><span className="text-xl">1 × 1</span><span className="mt-1 text-xs font-bold opacity-70">2 joueurs</span></span>
+            <span className="flex min-h-20 flex-col items-center justify-center rounded-2xl bg-[var(--surface-raised)] font-black peer-checked:bg-[var(--accent)] peer-checked:text-[var(--accent-contrast)]"><span className="text-xl">1 × 1</span><span className="mt-1 text-xs font-bold opacity-70">2 joueurs</span></span>
           </label>
           <label className="cursor-pointer">
             <input className="peer sr-only" type="radio" name="mode" value="two_v_two" />
-            <span className="flex min-h-20 flex-col items-center justify-center rounded-2xl bg-[var(--surface-raised)] font-black peer-checked:bg-[var(--accent)] peer-checked:text-[#102006]"><span className="text-xl">2 × 2</span><span className="mt-1 text-xs font-bold opacity-70">4 joueurs</span></span>
+            <span className="flex min-h-20 flex-col items-center justify-center rounded-2xl bg-[var(--surface-raised)] font-black peer-checked:bg-[var(--accent)] peer-checked:text-[var(--accent-contrast)]"><span className="text-xl">2 × 2</span><span className="mt-1 text-xs font-bold opacity-70">4 joueurs</span></span>
           </label>
         </div>
       </fieldset>
@@ -67,13 +67,13 @@ export function NewMatchForm() {
           {[5, 10, 15].map((score) => (
             <label key={score} className="cursor-pointer">
               <input className="peer sr-only" type="radio" name="targetScore" value={score} defaultChecked={score === 10} />
-              <span className="grid min-h-14 place-items-center rounded-2xl bg-[var(--surface-raised)] text-lg font-black peer-checked:bg-[var(--accent)] peer-checked:text-[#102006]">{score}</span>
+              <span className="grid min-h-14 place-items-center rounded-2xl bg-[var(--surface-raised)] text-lg font-black peer-checked:bg-[var(--accent)] peer-checked:text-[var(--accent-contrast)]">{score}</span>
             </label>
           ))}
         </div>
       </fieldset>
       {error ? <p role="alert" className="mt-4 text-sm text-red-300">{error}</p> : null}
-      <button disabled={busy} className="mt-6 min-h-16 w-full rounded-2xl bg-[var(--accent)] px-5 text-lg font-black text-[#102006] disabled:opacity-60">{busy ? "Création…" : "Créer le match"}</button>
+      <button disabled={busy} className="mt-6 min-h-16 w-full rounded-2xl bg-[var(--accent)] px-5 text-lg font-black text-[var(--accent-contrast)] disabled:opacity-60">{busy ? "Création…" : "Créer le match"}</button>
     </form>
   );
 }

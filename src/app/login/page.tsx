@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { BrandLogo } from "@/components/brand-logo";
 import { LoginForm } from "@/components/auth/login-form";
 import { safeRedirectPath } from "@/lib/auth/redirect";
 
@@ -16,8 +17,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
   return (
     <div className="mx-auto flex min-h-[calc(100dvh-5rem)] w-full max-w-md flex-col justify-center py-8">
-      <header className="mb-9 text-center">
-        <p className="text-sm font-black uppercase tracking-[0.22em] text-[var(--accent)]">Baby-foot</p>
+      <header className="mb-9 flex flex-col items-center text-center">
+        <BrandLogo priority />
+        <p className="mt-5 text-sm font-black uppercase tracking-[0.22em] text-[var(--accent)]">Baby-foot</p>
         <h1 className="mt-3 text-4xl font-black tracking-tight">Entrez dans le jeu</h1>
         <p className="mt-3 text-[var(--muted)]">Connectez-vous pour créer ou rejoindre un match.</p>
       </header>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -83,7 +83,7 @@ export function ScoreCounter(props: Props) {
       <InviteQrCode value={url} />
       <p className="mt-3 text-sm text-[var(--muted)]">Fais scanner ce code à ton adversaire.</p>
       <button type="button" onClick={() => navigator.clipboard.writeText(url)} className="mt-4 min-h-12 w-full rounded-2xl bg-[var(--surface-raised)] font-bold">Copier le lien</button>
-      <button type="button" onClick={() => router.push(`/match/${rematch.match_id}`)} className="mt-3 min-h-14 w-full rounded-2xl bg-[var(--accent)] font-black text-[#102006]">Ouvrir la revanche</button>
+      <button type="button" onClick={() => router.push(`/match/${rematch.match_id}`)} className="mt-3 min-h-14 w-full rounded-2xl bg-[var(--accent)] font-black text-[var(--accent-contrast)]">Ouvrir la revanche</button>
     </section>;
   }
 
@@ -93,7 +93,7 @@ export function ScoreCounter(props: Props) {
       <h2 className="mt-4 text-3xl font-black">{props.status === "cancelled" ? "Résultat refusé" : won ? "Victoire !" : "Match terminé"}</h2>
       <p className="mt-3 text-xl text-[var(--muted)]">{props.myScore} – {props.opponentScore}</p>
       {error ? <p role="alert" className="mt-4 text-sm text-red-300">{error}</p> : null}
-      <button type="button" onClick={createRematch} disabled={sending} className="mt-6 min-h-14 w-full rounded-2xl bg-[var(--accent)] font-black text-[#102006] disabled:opacity-60">{sending ? "Création…" : "Faire une revanche"}</button>
+      <button type="button" onClick={createRematch} disabled={sending} className="mt-6 min-h-14 w-full rounded-2xl bg-[var(--accent)] font-black text-[var(--accent-contrast)] disabled:opacity-60">{sending ? "Création…" : "Faire une revanche"}</button>
     </section>
   );
 
@@ -103,7 +103,7 @@ export function ScoreCounter(props: Props) {
       <p className="mt-4 text-6xl font-black tabular-nums">{props.myScore}<span className="mx-3 text-[var(--muted)]">–</span>{props.opponentScore}</p>
       <p className="mt-4 text-[var(--muted)]">{won ? "Tu as atteint le score cible." : `${props.opponentName} a atteint le score cible.`}</p>
       {error ? <p role="alert" className="mt-4 text-sm text-red-300">{error}</p> : null}
-      <button type="button" onClick={confirm} disabled={sending || props.confirmed} className="mt-6 min-h-16 w-full rounded-2xl bg-[var(--accent)] px-5 text-lg font-black text-[#102006] disabled:opacity-60">
+      <button type="button" onClick={confirm} disabled={sending || props.confirmed} className="mt-6 min-h-16 w-full rounded-2xl bg-[var(--accent)] px-5 text-lg font-black text-[var(--accent-contrast)] disabled:opacity-60">
         {props.confirmed ? "Confirmé · attente de l’adversaire" : sending ? "Confirmation…" : "Confirmer le résultat"}
       </button>
       {undoSeconds > 0 ? <button type="button" onClick={undoGoal} disabled={sending} className="mt-3 min-h-12 w-full rounded-2xl bg-[var(--surface-raised)] font-bold">Annuler mon but · {undoSeconds}s</button> : null}
@@ -121,10 +121,10 @@ export function ScoreCounter(props: Props) {
       <div className="mt-5 rounded-3xl bg-[var(--surface)] p-4 shadow-[inset_0_2px_10px_rgb(0_0_0_/_25%)]">
         <div className="overflow-x-auto pb-2">
           <div className="flex min-w-max items-center gap-1 rounded-full bg-[#050907] p-2" role="img" aria-label={`Ton score : ${props.myScore} sur ${props.targetScore}`}>
-            {scores.map((score) => <span key={score} className={`grid size-10 place-items-center rounded-full text-sm font-black transition ${score === props.myScore ? "scale-110 bg-[var(--accent)] text-[#102006] shadow-[0_0_20px_rgb(183_243_74_/_45%)]" : "text-[var(--muted)]"}`}>{score}</span>)}
+            {scores.map((score) => <span key={score} className={`grid size-10 place-items-center rounded-full text-sm font-black transition ${score === props.myScore ? "scale-110 bg-[var(--accent)] text-[var(--accent-contrast)] shadow-[0_0_20px_rgb(228_0_43_/_45%)]" : "text-[var(--muted)]"}`}>{score}</span>)}
           </div>
         </div>
-        <button type="button" onClick={addGoal} disabled={sending} className="mt-4 min-h-24 w-full rounded-2xl bg-[var(--accent)] px-5 text-xl font-black text-[#102006] transition active:scale-[0.98] disabled:opacity-60">
+        <button type="button" onClick={addGoal} disabled={sending} className="mt-4 min-h-24 w-full rounded-2xl bg-[var(--accent)] px-5 text-xl font-black text-[var(--accent-contrast)] transition active:scale-[0.98] disabled:opacity-60">
           <span className="block text-3xl">+1</span><span className="mt-1 block text-sm">{sending ? "Enregistrement…" : "J’ai marqué"}</span>
         </button>
         {undoSeconds > 0 ? <button type="button" onClick={undoGoal} disabled={sending} className="mt-3 min-h-12 w-full rounded-2xl bg-[var(--surface-raised)] font-bold">Annuler le dernier but · {undoSeconds}s</button> : null}

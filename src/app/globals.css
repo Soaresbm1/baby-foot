@@ -1,13 +1,14 @@
 @import "tailwindcss";
 
 :root {
-  --background: #07120e;
-  --surface: #102019;
-  --surface-raised: #172a21;
-  --foreground: #f6faf7;
-  --muted: #9db2a5;
-  --accent: #b7f34a;
-  --accent-strong: #91d81d;
+  --background: #0b0b0d;
+  --surface: #17181b;
+  --surface-raised: #24262a;
+  --foreground: #fafafa;
+  --muted: #a7a9ad;
+  --accent: #e4002b;
+  --accent-strong: #b80022;
+  --accent-contrast: #ffffff;
 }
 
 * {
@@ -16,22 +17,88 @@
 
 html {
   background: var(--background);
+  color-scheme: dark;
 }
 
 body {
   min-height: 100vh;
   margin: 0;
   background:
-    radial-gradient(circle at 50% -10%, rgb(62 108 75 / 35%), transparent 36rem),
+    linear-gradient(rgb(255 255 255 / 1.5%) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 1.5%) 1px, transparent 1px),
+    radial-gradient(circle at 50% -12%, rgb(228 0 43 / 22%), transparent 34rem),
     var(--background);
+  background-size: 28px 28px, 28px 28px, auto, auto;
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 button,
 a {
   -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+.app-shell {
+  animation: page-in 240ms ease-out both;
+}
+
+.app-shell > div {
+  width: 100%;
+  max-width: 42rem;
+  margin-inline: auto;
+}
+
+.app-shell > .home-dashboard {
+  max-width: 64rem;
+}
+
+::selection {
+  background: rgb(228 0 43 / 45%);
+  color: white;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: var(--surface-raised);
+}
+
+@keyframes page-in {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (hover: hover) {
+  a, button {
+    transition: transform 160ms ease, filter 160ms ease, background-color 160ms ease, border-color 160ms ease;
+  }
+
+  a:hover, button:hover:not(:disabled) {
+    filter: brightness(1.08);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 :focus-visible {

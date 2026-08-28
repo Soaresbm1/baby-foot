@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { type FormEvent, useState } from "react";
 
@@ -149,7 +149,7 @@ export function LoginForm({ nextPath }: LoginFormProps) {
 
         <button
           disabled={pending}
-          className="min-h-14 w-full rounded-2xl bg-[var(--accent)] px-5 font-black text-[#102006] transition active:scale-[0.98] disabled:opacity-60"
+          className="min-h-14 w-full rounded-2xl bg-[var(--accent)] px-5 font-black text-[var(--accent-contrast)] transition active:scale-[0.98] disabled:opacity-60"
         >
           {pending ? "Connexion…" : mode === "login" ? "Se connecter" : "Créer mon compte"}
         </button>

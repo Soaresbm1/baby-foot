@@ -13,9 +13,9 @@ export function MenuLink({ compact = false, detail, href, icon, label }: MenuLin
     return (
       <Link
         href={href}
-        className="flex min-h-24 flex-col items-center justify-center gap-2 rounded-2xl bg-[var(--surface)] px-2 text-center text-xs font-bold text-[var(--muted)] transition active:scale-[0.97]"
+        className="group flex min-h-20 flex-col items-center justify-center gap-2 rounded-2xl px-2 text-center text-[11px] font-bold text-[var(--muted)] transition active:scale-[0.97]"
       >
-        <span aria-hidden="true" className="text-xl text-[var(--foreground)]">
+        <span aria-hidden="true" className="grid size-9 place-items-center rounded-xl bg-[var(--surface-raised)] text-lg text-[var(--foreground)] group-hover:text-[var(--accent)]">
           {icon}
         </span>
         {label}
@@ -26,11 +26,11 @@ export function MenuLink({ compact = false, detail, href, icon, label }: MenuLin
   return (
     <Link
       href={href}
-      className="flex min-h-20 items-center gap-4 rounded-3xl bg-[var(--surface)] px-5 transition active:scale-[0.98]"
+      className="group flex min-h-20 items-center gap-4 rounded-3xl border border-white/5 bg-[var(--surface)] px-5 shadow-[0_12px_30px_rgb(0_0_0_/_14%)] transition active:scale-[0.98]"
     >
       <span
         aria-hidden="true"
-        className="grid size-11 place-items-center rounded-full bg-[var(--surface-raised)] text-2xl text-[var(--accent)]"
+        className="grid size-11 place-items-center rounded-2xl bg-[var(--surface-raised)] text-2xl text-[var(--accent)] transition group-hover:scale-105"
       >
         {icon}
       </span>
@@ -38,7 +38,7 @@ export function MenuLink({ compact = false, detail, href, icon, label }: MenuLin
         <span className="block font-bold">{label}</span>
         {detail ? <span className="mt-1 block text-sm text-[var(--muted)]">{detail}</span> : null}
       </span>
-      <span aria-hidden="true" className="ml-auto text-xl text-[var(--muted)]">
+      <span aria-hidden="true" className="ml-auto grid size-9 place-items-center rounded-full bg-[var(--surface-raised)] text-xl text-[var(--muted)] transition group-hover:translate-x-0.5 group-hover:text-white">
         ›
       </span>
     </Link>

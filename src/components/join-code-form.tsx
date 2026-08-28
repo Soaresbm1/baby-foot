@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
@@ -31,7 +31,7 @@ export function JoinCodeForm() {
         <input name="invitation" required autoCapitalize="none" autoCorrect="off" className="mt-2 min-h-14 w-full rounded-2xl bg-[var(--surface-raised)] px-4 font-mono text-sm outline-none" placeholder="https://…/join/…" />
       </label>
       {error ? <p role="alert" className="mt-3 text-sm text-red-300">{error}</p> : null}
-      <button className="mt-5 min-h-14 w-full rounded-2xl bg-[var(--accent)] px-5 font-black text-[#102006]">Continuer</button>
+      <button className="mt-5 min-h-14 w-full rounded-2xl bg-[var(--accent)] px-5 font-black text-[var(--accent-contrast)]">Continuer</button>
     </form>
   );
 }

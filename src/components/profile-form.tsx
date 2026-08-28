@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
@@ -66,7 +66,7 @@ export function ProfileForm({ initialAvatarUrl, initialDisplayName }: ProfileFor
           {message ? <p role="status" className="text-sm text-red-300">{message}</p> : null}
           <div className="grid grid-cols-2 gap-3">
             <button type="button" onClick={() => { setEditing(false); setMessage(undefined); }} className="min-h-12 rounded-2xl bg-[var(--surface-raised)] px-4 font-bold">Annuler</button>
-            <button disabled={busy} className="min-h-12 rounded-2xl bg-[var(--accent)] px-4 font-black text-[#102006] disabled:opacity-60">{busy ? "Enregistrement…" : "Enregistrer"}</button>
+            <button disabled={busy} className="min-h-12 rounded-2xl bg-[var(--accent)] px-4 font-black text-[var(--accent-contrast)] disabled:opacity-60">{busy ? "Enregistrement…" : "Enregistrer"}</button>
           </div>
         </form>
       ) : message ? <p role="status" className="mt-4 text-sm text-[var(--accent)]">{message}</p> : null}

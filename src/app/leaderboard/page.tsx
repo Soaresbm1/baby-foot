@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
@@ -55,7 +55,7 @@ export default async function LeaderboardPage() {
           <div aria-hidden="true" className="mx-auto grid size-16 place-items-center rounded-full bg-[var(--surface-raised)] text-3xl">🏆</div>
           <h2 className="mt-5 text-xl font-black">Le podium est encore libre</h2>
           <p className="mt-2 text-sm text-[var(--muted)]">Termine et confirme un premier match pour inaugurer le classement.</p>
-          <Link href="/match/new" className="mt-6 flex min-h-14 items-center justify-center rounded-2xl bg-[var(--accent)] px-5 font-black text-[#102006]">Créer un match</Link>
+          <Link href="/match/new" className="mt-6 flex min-h-14 items-center justify-center rounded-2xl bg-[var(--accent)] px-5 font-black text-[var(--accent-contrast)]">Créer un match</Link>
         </section>
       ) : (
         <>
@@ -65,7 +65,7 @@ export default async function LeaderboardPage() {
               const isFirst = entry.rank === 1;
               return (
                 <div key={entry.player_id} className={`rounded-3xl bg-[var(--surface)] px-2 py-5 text-center ${isFirst ? "pb-8 pt-7" : ""}`}>
-                  <div className={`mx-auto grid place-items-center rounded-full font-black text-[#102006] ${isFirst ? "size-16 bg-[var(--accent)] text-xl" : "size-12 bg-[var(--muted)]"}`}>{initials(entry.display_name)}</div>
+                  <div className={`mx-auto grid place-items-center rounded-full font-black text-[var(--accent-contrast)] ${isFirst ? "size-16 bg-[var(--accent)] text-xl" : "size-12 bg-[var(--muted)]"}`}>{initials(entry.display_name)}</div>
                   <p className="mt-3 truncate text-sm font-black">{entry.display_name}</p>
                   <p className="mt-1 text-xs text-[var(--muted)]">{entry.wins} victoire{entry.wins === 1 ? "" : "s"}</p>
                   <span className="mt-3 inline-grid size-7 place-items-center rounded-full bg-[var(--surface-raised)] text-xs font-black">{entry.rank}</span>

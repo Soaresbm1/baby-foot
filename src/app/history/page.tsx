@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
@@ -16,7 +16,7 @@ type HistoryEntry = {
 };
 
 const resultDetails = {
-  won: { label: "Victoire", badge: "V", color: "bg-[var(--accent)] text-[#102006]" },
+  won: { label: "Victoire", badge: "V", color: "bg-[var(--accent)] text-[var(--accent-contrast)]" },
   lost: { label: "Défaite", badge: "D", color: "bg-red-400/15 text-red-300" },
   cancelled: { label: "Annulé", badge: "—", color: "bg-[var(--surface-raised)] text-[var(--muted)]" },
 } as const;
@@ -78,7 +78,7 @@ export default async function HistoryPage() {
           <div aria-hidden="true" className="mx-auto grid size-16 place-items-center rounded-full bg-[var(--surface-raised)] text-3xl">↺</div>
           <h2 className="mt-5 text-xl font-black">Aucun match terminé</h2>
           <p className="mt-2 text-sm text-[var(--muted)]">Tes résultats confirmés apparaîtront ici.</p>
-          <Link href="/match/new" className="mt-6 flex min-h-14 items-center justify-center rounded-2xl bg-[var(--accent)] px-5 font-black text-[#102006]">Jouer maintenant</Link>
+          <Link href="/match/new" className="mt-6 flex min-h-14 items-center justify-center rounded-2xl bg-[var(--accent)] px-5 font-black text-[var(--accent-contrast)]">Jouer maintenant</Link>
         </section>
       ) : (
         <section className="mt-8" aria-labelledby="match-list">
