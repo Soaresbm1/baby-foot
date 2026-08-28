@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { InviteQrCode } from "@/components/invite-qr-code";
@@ -14,6 +14,7 @@ type Props = {
 
 export function ScoreCounter(props: Props) {
   const router = useRouter();
+  const goalRequestId = useRef<string | null>(null);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string>();
   const [undoSeconds, setUndoSeconds] = useState(0);
@@ -29,11 +30,13 @@ export function ScoreCounter(props: Props) {
   async function addGoal() {
     if (sending) return;
     setSending(true); setError(undefined);
+    goalRequestId.current ??= crypto.randomUUID();
     const { error: rpcError } = await createClient().rpc("add_goal", {
-      p_match_id: props.matchId, p_request_id: crypto.randomUUID(), p_team_id: props.myTeamId,
+      p_match_id: props.matchId, p_request_id: goalRequestId.current, p_team_id: props.myTeamId,
     });
     setSending(false);
-    if (rpcError) { setError("Le but n’a pas été enregistré. Vérifie la connexion."); return; }
+    if (rpcError) { setError("Réponse perdue. Touche à nouveau pour vérifier ce même but sans le compter deux fois."); return; }
+    goalRequestId.current = null;
     setUndoSeconds(3); navigator.vibrate?.(40); router.refresh();
   }
 
