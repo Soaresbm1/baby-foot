@@ -35,7 +35,7 @@ export default async function MatchPage({ params }: MatchPageProps) {
 
   return (
     <div>
-      <MatchRealtimeRefresh matchId={id} />
+      <MatchRealtimeRefresh currentUserId={auth.user.id} matchId={id} />
       <Link href="/" className="text-sm font-bold text-[var(--muted)]">← Accueil</Link>
       <p className="mt-10 text-sm font-bold uppercase tracking-[0.22em] text-[var(--accent)]">Match en cours</p>
       <h1 className="mt-2 text-3xl font-black">{match.mode === "two_v_two" ? "2 contre 2" : "1 contre 1"} · Premier à {match.target_score}</h1>
