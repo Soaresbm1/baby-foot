@@ -20,6 +20,7 @@ function friendlyAuthError(message: string) {
 }
 
 export function LoginForm({ nextPath }: LoginFormProps) {
+  const microsoftEnabled = process.env.NEXT_PUBLIC_ENABLE_MICROSOFT_AUTH === "true";
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [error, setError] = useState<string>();
   const [notice, setNotice] = useState<string>();
@@ -86,26 +87,30 @@ export function LoginForm({ nextPath }: LoginFormProps) {
 
   return (
     <div className="space-y-6">
-      <button
-        type="button"
-        onClick={handleMicrosoftLogin}
-        disabled={pending}
-        className="flex min-h-14 w-full items-center justify-center gap-3 rounded-2xl bg-white px-5 font-bold text-[#18201b] transition active:scale-[0.98] disabled:opacity-60"
-      >
-        <span aria-hidden="true" className="grid grid-cols-2 gap-0.5">
-          <i className="size-2.5 bg-[#f25022]" />
-          <i className="size-2.5 bg-[#7fba00]" />
-          <i className="size-2.5 bg-[#00a4ef]" />
-          <i className="size-2.5 bg-[#ffb900]" />
-        </span>
-        Continuer avec Microsoft
-      </button>
+      {microsoftEnabled ? (
+        <>
+          <button
+            type="button"
+            onClick={handleMicrosoftLogin}
+            disabled={pending}
+            className="flex min-h-14 w-full items-center justify-center gap-3 rounded-2xl bg-white px-5 font-bold text-[#18201b] transition active:scale-[0.98] disabled:opacity-60"
+          >
+            <span aria-hidden="true" className="grid grid-cols-2 gap-0.5">
+              <i className="size-2.5 bg-[#f25022]" />
+              <i className="size-2.5 bg-[#7fba00]" />
+              <i className="size-2.5 bg-[#00a4ef]" />
+              <i className="size-2.5 bg-[#ffb900]" />
+            </span>
+            Continuer avec Microsoft
+          </button>
 
-      <div className="flex items-center gap-3 text-xs font-bold uppercase tracking-widest text-[var(--muted)]">
-        <span className="h-px flex-1 bg-[var(--surface-raised)]" />
-        ou
-        <span className="h-px flex-1 bg-[var(--surface-raised)]" />
-      </div>
+          <div className="flex items-center gap-3 text-xs font-bold uppercase tracking-widest text-[var(--muted)]">
+            <span className="h-px flex-1 bg-[var(--surface-raised)]" />
+            ou
+            <span className="h-px flex-1 bg-[var(--surface-raised)]" />
+          </div>
+        </>
+      ) : null}
 
       <form method="post" onSubmit={handleCredentials} className="space-y-4">
         {mode === "signup" ? (

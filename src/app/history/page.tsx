@@ -91,7 +91,7 @@ export default async function HistoryPage() {
               const details = resultDetails[match.result];
               return (
                 <li key={match.match_id}>
-                  <Link href={`/match/${match.match_id}`} className="flex min-h-24 items-center gap-4 rounded-3xl bg-[var(--surface)] p-4 transition active:scale-[0.99]">
+                  <Link href={`/history/${match.match_id}`} className="flex min-h-24 items-center gap-4 rounded-3xl bg-[var(--surface)] p-4 transition active:scale-[0.99]">
                     <span className={`grid size-11 shrink-0 place-items-center rounded-full text-sm font-black ${details.color}`}>{details.badge}</span>
                     <span className="min-w-0 flex-1">
                       <span className="block truncate font-black">vs {match.opponent_names}</span>
