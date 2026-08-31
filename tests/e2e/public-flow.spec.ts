@@ -23,3 +23,10 @@ test("un utilisateur anonyme est redirigé vers la connexion", async ({ page }) 
   await expect(page.getByRole("heading", { name: "Entrez dans le jeu" })).toBeVisible();
   await expectNoAccessibilityViolations(page);
 });
+
+test("une adresse inconnue propose un retour à l’accueil", async ({ page }) => {
+  await page.goto("/page-qui-n-existe-pas");
+  await expect(page.getByRole("heading", { name: "Cette page n’existe pas." })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Revenir à l’accueil" })).toHaveAttribute("href", "/");
+  await expectNoAccessibilityViolations(page);
+});
