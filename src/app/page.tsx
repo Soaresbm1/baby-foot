@@ -22,7 +22,7 @@ export default function HomePage() {
           href="/match/new"
           className="group flex min-h-28 items-center justify-between overflow-hidden rounded-[2rem] bg-[var(--accent)] px-6 text-xl font-black text-[var(--accent-contrast)] shadow-[0_18px_45px_rgb(228_0_43_/_24%)] transition active:scale-[0.98]"
         >
-          <span><span className="block text-xs font-bold uppercase tracking-[0.18em] text-white/65">Nouvelle partie</span><span className="mt-1 block">Créer un match</span></span>
+          <span><span className="block text-xs font-bold uppercase tracking-[0.18em] text-white">Nouvelle partie</span><span className="mt-1 block">Créer un match</span></span>
           <span aria-hidden="true" className="grid size-12 place-items-center rounded-full bg-white/15 text-3xl transition group-hover:scale-105">
             +
           </span>
