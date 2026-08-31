@@ -4,12 +4,7 @@ import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import QrScanner from "qr-scanner";
 
-function invitationToken(value: string) {
-  let candidate = value.trim();
-  try { candidate = new URL(candidate).pathname.split("/").filter(Boolean).at(-1) ?? ""; }
-  catch { candidate = candidate.split("/").filter(Boolean).at(-1) ?? ""; }
-  return /^[a-f0-9]{64}$/i.test(candidate) ? candidate.toLowerCase() : null;
-}
+import { parseInvitationToken } from "@/lib/invitation";
 
 export function QrCodeScanner() {
   const router = useRouter();
@@ -21,7 +16,7 @@ export function QrCodeScanner() {
   useEffect(() => () => scannerRef.current?.destroy(), []);
 
   function accept(value: string) {
-    const token = invitationToken(value);
+    const token = parseInvitationToken(value);
     if (!token) { setError("Ce QR code ne contient pas une invitation Baby-foot valide."); return false; }
     scannerRef.current?.destroy(); router.push(`/join/${token}`); return true;
   }

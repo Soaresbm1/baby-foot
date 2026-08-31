@@ -3,25 +3,20 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 
+import { parseInvitationToken } from "@/lib/invitation";
+
 export function JoinCodeForm() {
   const router = useRouter();
   const [error, setError] = useState<string>();
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const value = String(new FormData(event.currentTarget).get("invitation") ?? "").trim();
-    let token = value;
-    try {
-      const url = new URL(value);
-      token = url.pathname.split("/").filter(Boolean).at(-1) ?? "";
-    } catch {
-      token = value.split("/").filter(Boolean).at(-1) ?? "";
-    }
-    if (!/^[a-f0-9]{64}$/i.test(token)) {
+    const token = parseInvitationToken(String(new FormData(event.currentTarget).get("invitation") ?? ""));
+    if (!token) {
       setError("Ce code d’invitation n’est pas valide.");
       return;
     }
-    router.push(`/join/${token.toLowerCase()}`);
+    router.push(`/join/${token}`);
   }
 
   return (
