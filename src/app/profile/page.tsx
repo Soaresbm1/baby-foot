@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { ProfileForm } from "@/components/profile-form";
 import { InstallAppButton } from "@/components/install-app-button";
 import { SignOutButton } from "@/components/sign-out-button";
+import { getAchievements } from "@/lib/achievements";
 import { createClient } from "@/lib/supabase/server";
 
 type PlayerStatistics = {
@@ -48,6 +49,13 @@ export default async function ProfilePage() {
   if (!profile) redirect("/login");
   const statistics = ((leaderboard ?? []) as PlayerStatistics[]).find((entry) => entry.player_id === auth.user.id);
   const advanced = ((advancedData ?? []) as AdvancedStatistics[])[0];
+  const achievements = getAchievements({
+    matchesPlayed: statistics?.matches_played ?? 0,
+    wins: statistics?.wins ?? 0,
+    totalGoals: advanced?.total_goals ?? 0,
+    bestWinStreak: advanced?.best_win_streak ?? 0,
+  });
+  const unlockedAchievements = achievements.filter((achievement) => achievement.unlocked).length;
   const memberSince = new Intl.DateTimeFormat("fr-CH", { month: "long", year: "numeric" }).format(new Date(profile.created_at));
 
   return (
@@ -114,6 +122,23 @@ export default async function ProfilePage() {
           <div><span className="text-xs font-bold uppercase tracking-wider text-[var(--muted)]">Adversaire le plus rencontré</span><strong className="mt-2 block text-lg font-black">{advanced?.favorite_opponent_name ?? "Pas encore d’adversaire"}</strong></div>
           {advanced?.favorite_opponent_name ? <span className="rounded-full bg-[var(--surface-raised)] px-3 py-2 text-sm font-black">{advanced.favorite_opponent_matches} match{advanced.favorite_opponent_matches === 1 ? "" : "s"}</span> : null}
         </div>
+      </section>
+
+      <section className="mt-8" aria-labelledby="achievements-title">
+        <div className="flex items-end justify-between gap-4">
+          <div><p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--accent)]">Progression</p><h2 id="achievements-title" className="mt-1 text-xl font-black">Trophées</h2></div>
+          <span className="rounded-full bg-[var(--surface)] px-3 py-2 text-xs font-black">{unlockedAchievements}/{achievements.length}</span>
+        </div>
+        <ul className="mt-4 grid grid-cols-2 gap-3">
+          {achievements.map((achievement) => (
+            <li key={achievement.id} className={`rounded-3xl border p-4 ${achievement.unlocked ? "border-[var(--accent)]/30 bg-[var(--surface)]" : "border-white/5 bg-[var(--surface)]/55 opacity-65"}`}>
+              <span aria-hidden="true" className={`grid size-11 place-items-center rounded-2xl text-xl ${achievement.unlocked ? "bg-[var(--accent)]" : "bg-[var(--surface-raised)] grayscale"}`}>{achievement.unlocked ? achievement.icon : "🔒"}</span>
+              <strong className="mt-3 block text-sm">{achievement.name}</strong>
+              <span className="mt-1 block text-xs leading-5 text-[var(--muted)]">{achievement.description}</span>
+              {!achievement.unlocked ? <span className="mt-2 block text-xs font-bold text-[var(--muted)]">{Math.min(achievement.current, achievement.target)}/{achievement.target}</span> : <span className="mt-2 block text-xs font-black text-[var(--accent)]">Débloqué</span>}
+            </li>
+          ))}
+        </ul>
       </section>
 
       <ProfileForm initialAvatarUrl={profile.avatar_url ?? ""} initialDisplayName={profile.display_name} />
