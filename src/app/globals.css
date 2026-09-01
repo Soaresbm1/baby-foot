@@ -101,6 +101,12 @@ button:disabled {
   }
 }
 
+@media (display-mode: standalone) {
+  .install-app-button {
+    display: none;
+  }
+}
+
 :focus-visible {
   outline: 3px solid var(--accent);
   outline-offset: 3px;

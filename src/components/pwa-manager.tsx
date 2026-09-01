@@ -20,16 +20,24 @@ export function PwaManager() {
     }
     const standalone = window.matchMedia("(display-mode: standalone)").matches
       || ("standalone" in navigator && Boolean((navigator as Navigator & { standalone?: boolean }).standalone));
-    if (standalone || localStorage.getItem("pwa-install-dismissed") === "true") return;
+    if (standalone) return;
+    const dismissed = localStorage.getItem("pwa-install-dismissed") === "true";
     const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
-    const iosTimer = ios ? window.setTimeout(() => { setShowIosHelp(true); setVisible(true); }, 0) : null;
+    const iosTimer = ios && !dismissed ? window.setTimeout(() => { setShowIosHelp(true); setVisible(true); }, 0) : null;
     const onPrompt = (event: Event) => {
-      event.preventDefault(); setPrompt(event as InstallPromptEvent); setVisible(true);
+      event.preventDefault(); setPrompt(event as InstallPromptEvent); if (!dismissed) setVisible(true);
+    };
+    const onManualRequest = () => {
+      localStorage.removeItem("pwa-install-dismissed");
+      setShowIosHelp(ios);
+      setVisible(true);
     };
     window.addEventListener("beforeinstallprompt", onPrompt);
+    window.addEventListener("pwa-install-request", onManualRequest);
     return () => {
       if (iosTimer !== null) window.clearTimeout(iosTimer);
       window.removeEventListener("beforeinstallprompt", onPrompt);
+      window.removeEventListener("pwa-install-request", onManualRequest);
     };
   }, []);
 
@@ -48,7 +56,7 @@ export function PwaManager() {
     <aside className="fixed inset-x-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-[60] mx-auto max-w-lg rounded-3xl border border-white/10 bg-[var(--surface)]/95 p-4 shadow-2xl backdrop-blur" aria-label="Installer l’application">
       <div className="flex items-start gap-3">
         <BrandLogo compact />
-        <div className="min-w-0 flex-1"><p className="font-black">Installer Baby-foot</p><p className="mt-1 text-sm text-[var(--muted)]">{showIosHelp ? "Dans Safari, touche Partager puis « Sur l’écran d’accueil »." : "Accède aux matchs comme à une vraie application."}</p></div>
+        <div className="min-w-0 flex-1"><p className="font-black">Installer Baby-foot</p><p className="mt-1 text-sm text-[var(--muted)]">{showIosHelp ? "Dans Safari, touche Partager puis « Sur l’écran d’accueil »." : prompt ? "Accède aux matchs comme à une vraie application." : "Ouvre le menu du navigateur puis choisis « Installer l’application »."}</p></div>
         <button type="button" onClick={dismiss} aria-label="Fermer" className="grid size-10 shrink-0 place-items-center text-xl text-[var(--muted)]">×</button>
       </div>
       {!showIosHelp && prompt ? <button type="button" onClick={install} className="mt-4 min-h-12 w-full rounded-2xl bg-[var(--accent)] font-black text-[var(--accent-contrast)]">Installer</button> : null}

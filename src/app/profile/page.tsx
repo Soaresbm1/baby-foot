@@ -2,6 +2,7 @@
 import { redirect } from "next/navigation";
 
 import { ProfileForm } from "@/components/profile-form";
+import { InstallAppButton } from "@/components/install-app-button";
 import { SignOutButton } from "@/components/sign-out-button";
 import { createClient } from "@/lib/supabase/server";
 
@@ -121,6 +122,7 @@ export default async function ProfilePage() {
         <Link href="/history" className="flex min-h-14 items-center justify-center rounded-2xl bg-[var(--surface)] px-4 font-bold">Historique</Link>
         <Link href="/leaderboard" className="flex min-h-14 items-center justify-center rounded-2xl bg-[var(--surface)] px-4 font-bold">Classement</Link>
       </div>
+      <InstallAppButton />
       <SignOutButton />
     </div>
   );
