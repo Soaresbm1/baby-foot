@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 };
 
 type LoginPageProps = {
-  searchParams: Promise<{ error?: string; next?: string }>;
+  searchParams: Promise<{ error?: string; next?: string; reset?: string }>;
 };
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
@@ -27,6 +27,11 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       {parameters.error === "oauth" ? (
         <p role="alert" className="mb-5 rounded-xl bg-red-950/60 px-4 py-3 text-sm text-red-200">
           La connexion Microsoft n’a pas abouti. Réessayez.
+        </p>
+      ) : null}
+      {parameters.reset === "success" ? (
+        <p role="status" className="mb-5 rounded-xl bg-lime-950/60 px-4 py-3 text-sm text-lime-100">
+          Ton mot de passe a été modifié. Tu peux maintenant te connecter.
         </p>
       ) : null}
       <LoginForm nextPath={safeRedirectPath(parameters.next)} />

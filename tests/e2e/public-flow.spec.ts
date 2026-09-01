@@ -41,3 +41,11 @@ test("les en-têtes HTTP protègent l'application", async ({ request }) => {
   expect(headers["x-content-type-options"]).toBe("nosniff");
   expect(headers["x-frame-options"]).toBe("DENY");
 });
+
+test("la récupération du mot de passe est accessible", async ({ page }) => {
+  await page.goto("/forgot-password");
+  await expect(page.getByRole("heading", { name: "Mot de passe oublié ?" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Envoyer le lien" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Revenir à la connexion" })).toHaveAttribute("href", "/login");
+  await expectNoAccessibilityViolations(page);
+});

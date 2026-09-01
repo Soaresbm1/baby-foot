@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { type FormEvent, useState } from "react";
+import Link from "next/link";
 
 import { safeRedirectPath } from "@/lib/auth/redirect";
 import { createClient } from "@/lib/supabase/client";
@@ -148,6 +149,7 @@ export function LoginForm({ nextPath }: LoginFormProps) {
             className="mt-2 min-h-14 w-full rounded-2xl border border-transparent bg-[var(--surface)] px-4 text-base font-normal focus:border-[var(--accent)] focus:outline-none"
           />
         </label>
+        {mode === "login" ? <Link href="/forgot-password" className="inline-block text-sm font-bold text-[var(--muted)]">Mot de passe oublié ?</Link> : null}
 
         {error ? <p role="alert" className="rounded-xl bg-red-950/60 px-4 py-3 text-sm text-red-200">{error}</p> : null}
         {notice ? <p role="status" className="rounded-xl bg-lime-950/60 px-4 py-3 text-sm text-lime-100">{notice}</p> : null}
