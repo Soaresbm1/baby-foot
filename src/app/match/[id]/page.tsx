@@ -5,6 +5,7 @@ import { CancelMatchButton } from "@/components/cancel-match-button";
 import { LeaveMatchButton } from "@/components/leave-match-button";
 import { MatchInvitation } from "@/components/match-invitation";
 import { MatchRealtimeRefresh } from "@/components/match-realtime-refresh";
+import { MatchTimer } from "@/components/match-timer";
 import { ReadyButton } from "@/components/ready-button";
 import { ScoreCounter } from "@/components/score-counter";
 import { TeamOrganizer } from "@/components/team-organizer";
@@ -19,7 +20,7 @@ export default async function MatchPage({ params }: MatchPageProps) {
   if (!auth.user) redirect(`/login?next=${encodeURIComponent(`/match/${id}`)}`);
 
   const { data: match } = await supabase.from("matches")
-    .select("id,mode,status,target_score,team_a_score,team_b_score,winner_team_id,created_by")
+    .select("id,mode,status,target_score,team_a_score,team_b_score,winner_team_id,created_by,started_at")
     .eq("id", id).single();
   if (!match) notFound();
   const { data: participants } = await supabase.from("match_participants")
@@ -43,6 +44,7 @@ export default async function MatchPage({ params }: MatchPageProps) {
       <Link href="/" className="text-sm font-bold text-[var(--muted)]">← Accueil</Link>
       <p className="mt-10 text-sm font-bold uppercase tracking-[0.22em] text-[var(--accent)]">Match en cours</p>
       <h1 className="mt-2 text-3xl font-black">{match.mode === "two_v_two" ? "2 contre 2" : "1 contre 1"} · Premier à {match.target_score}</h1>
+      {match.status === "in_progress" && match.started_at ? <MatchTimer startedAt={match.started_at} /> : null}
 
       {(match.status === "waiting_for_players" || match.status === "waiting_for_ready") ? (
         <div className="mt-8 grid grid-cols-2 gap-4">

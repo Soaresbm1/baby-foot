@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
 import { ShareMatchResult } from "@/components/share-match-result";
+import { formatMatchDuration } from "@/lib/match-duration";
 import { createClient } from "@/lib/supabase/server";
 
 type MatchDetailPageProps = { params: Promise<{ id: string }> };
@@ -56,6 +57,9 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
   }));
   const winnerSide = participants.find((participant) => participant.team_id === match.winner_team_id);
   const winningSide = winnerSide ? related(winnerSide.match_teams)?.side : null;
+  const duration = match.started_at && match.ended_at
+    ? formatMatchDuration((new Date(match.ended_at).getTime() - new Date(match.started_at).getTime()) / 1000)
+    : null;
 
   return (
     <div>
@@ -92,6 +96,7 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
           }, [])}
         </div>
         {winningSide ? <p className="mt-5 border-t border-white/5 pt-4 text-center text-sm font-bold text-[var(--accent)]">Victoire de l’équipe {winningSide === 1 ? "A" : "B"}</p> : null}
+        {duration ? <p className="mt-3 text-center text-sm text-[var(--muted)]">Durée du match : <strong className="text-white tabular-nums">{duration}</strong></p> : null}
         {match.status === "cancelled" ? <p className="mt-5 border-t border-white/5 pt-4 text-center text-sm text-[var(--muted)]">Résultat refusé par un participant</p> : null}
         {match.status === "completed" ? (
           <ShareMatchResult
