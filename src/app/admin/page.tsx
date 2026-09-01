@@ -39,6 +39,14 @@ type AdminDashboard = {
   matches: AdminMatch[];
 };
 
+type AdminAuditEntry = {
+  id: string;
+  action: "admin_granted" | "admin_revoked";
+  created_at: string;
+  actor: { display_name: string } | { display_name: string }[] | null;
+  target: { display_name: string } | { display_name: string }[] | null;
+};
+
 const statusLabels: Record<string, string> = {
   waiting_for_players: "En attente de joueurs",
   waiting_for_ready: "En attente de validation",
@@ -57,6 +65,11 @@ function formatDate(value: string) {
   }).format(new Date(value));
 }
 
+function relatedName(value: AdminAuditEntry["actor"]) {
+  const profile = Array.isArray(value) ? value[0] : value;
+  return profile?.display_name ?? "Utilisateur inconnu";
+}
+
 export default async function AdminPage() {
   const supabase = await createClient();
   const { data: auth } = await supabase.auth.getUser();
@@ -65,8 +78,16 @@ export default async function AdminPage() {
   const { data: isAdmin, error: roleError } = await supabase.rpc("current_user_is_admin");
   if (roleError || !isAdmin) notFound();
 
-  const { data, error } = await supabase.rpc("get_admin_dashboard");
+  const [{ data, error }, { data: auditData, error: auditError }] = await Promise.all([
+    supabase.rpc("get_admin_dashboard"),
+    supabase
+      .from("admin_audit_log")
+      .select("id,action,created_at,actor:profiles!admin_audit_log_actor_id_fkey(display_name),target:profiles!admin_audit_log_target_user_id_fkey(display_name)")
+      .order("created_at", { ascending: false })
+      .limit(20),
+  ]);
   const dashboard = data as AdminDashboard | null;
+  const auditEntries = (auditData ?? []) as AdminAuditEntry[];
 
   return (
     <div>
@@ -138,6 +159,32 @@ export default async function AdminPage() {
                 </li>
               ))}
             </ul>
+          </section>
+
+          <section className="mt-10" aria-labelledby="admin-audit">
+            <div className="flex items-end justify-between gap-4">
+              <div><p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--accent)]">Sécurité</p><h2 id="admin-audit" className="mt-1 text-xl font-black">Journal des droits</h2></div>
+              <span className="text-xs font-bold text-[var(--muted)]">20 derniers</span>
+            </div>
+            {auditError ? (
+              <p className="mt-4 rounded-3xl border border-amber-300/20 bg-amber-300/10 p-4 text-sm text-amber-100">Applique la migration de gestion des administrateurs pour activer le journal.</p>
+            ) : auditEntries.length === 0 ? (
+              <p className="mt-4 rounded-3xl bg-[var(--surface)] p-5 text-sm text-[var(--muted)]">Aucun changement de droits enregistré.</p>
+            ) : (
+              <ol className="mt-4 divide-y divide-white/5 overflow-hidden rounded-3xl bg-[var(--surface)]">
+                {auditEntries.map((entry) => (
+                  <li key={entry.id} className="flex min-h-20 items-center gap-3 px-4 py-3">
+                    <span aria-hidden="true" className={`grid size-10 shrink-0 place-items-center rounded-full font-black ${entry.action === "admin_granted" ? "bg-[var(--accent)]/15 text-[var(--accent)]" : "bg-red-400/10 text-red-300"}`}>{entry.action === "admin_granted" ? "+" : "−"}</span>
+                    <span className="min-w-0 flex-1 text-sm">
+                      <strong>{relatedName(entry.actor)}</strong>
+                      <span className="text-[var(--muted)]"> {entry.action === "admin_granted" ? "a donné les droits à" : "a retiré les droits de"} </span>
+                      <strong>{relatedName(entry.target)}</strong>
+                      <span className="mt-1 block text-xs text-[var(--muted)]">{formatDate(entry.created_at)}</span>
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            )}
           </section>
         </>
       )}
