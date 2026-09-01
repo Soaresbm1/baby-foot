@@ -30,3 +30,14 @@ test("une adresse inconnue propose un retour à l’accueil", async ({ page }) =
   await expect(page.getByRole("link", { name: "Revenir à l’accueil" })).toHaveAttribute("href", "/");
   await expectNoAccessibilityViolations(page);
 });
+
+test("les en-têtes HTTP protègent l'application", async ({ request }) => {
+  const response = await request.get("/");
+  const headers = response.headers();
+
+  expect(headers["content-security-policy"]).toContain("frame-ancestors 'none'");
+  expect(headers["permissions-policy"]).toContain("camera=(self)");
+  expect(headers["referrer-policy"]).toBe("same-origin");
+  expect(headers["x-content-type-options"]).toBe("nosniff");
+  expect(headers["x-frame-options"]).toBe("DENY");
+});
