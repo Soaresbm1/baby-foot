@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 
 import { CancelMatchButton } from "@/components/cancel-match-button";
 import { LeaveMatchButton } from "@/components/leave-match-button";
+import { MatchInvitation } from "@/components/match-invitation";
 import { MatchRealtimeRefresh } from "@/components/match-realtime-refresh";
 import { ReadyButton } from "@/components/ready-button";
 import { ScoreCounter } from "@/components/score-counter";
@@ -66,6 +67,7 @@ export default async function MatchPage({ params }: MatchPageProps) {
         </div>
       ) : null}
       {match.status === "waiting_for_players" ? <p className="mt-6 text-center text-[var(--muted)]">En attente de {match.mode === "two_v_two" ? `${4 - (participants?.length ?? 0)} joueur${4 - (participants?.length ?? 0) > 1 ? "s" : ""}` : "l’adversaire"}…</p> : null}
+      {match.status === "waiting_for_players" && match.created_by === auth.user.id ? <MatchInvitation matchId={id} /> : null}
       {match.status === "waiting_for_ready" && mine ? <ReadyButton matchId={id} initialReady={mine.is_ready} /> : null}
       {(match.status === "waiting_for_players" || match.status === "waiting_for_ready") && match.created_by === auth.user.id ? <CancelMatchButton matchId={id} /> : null}
       {(match.status === "waiting_for_players" || match.status === "waiting_for_ready") && mine && match.created_by !== auth.user.id ? <LeaveMatchButton matchId={id} /> : null}
