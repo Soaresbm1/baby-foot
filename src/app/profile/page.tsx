@@ -40,7 +40,7 @@ export default async function ProfilePage() {
 
   const [{ data: profile }, { data: leaderboard }, { data: advancedData }] = await Promise.all([
     supabase.from("profiles").select("display_name,email,avatar_url,created_at").eq("id", auth.user.id).single(),
-    supabase.rpc("get_leaderboard"),
+    supabase.rpc("get_leaderboard", { p_mode: null }),
     supabase.rpc("get_my_advanced_statistics"),
   ]);
 

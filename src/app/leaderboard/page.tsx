@@ -109,10 +109,10 @@ export default async function LeaderboardPage({ searchParams }: LeaderboardPageP
                 <li key={entry.player_id} className={`flex min-h-20 items-center gap-3 rounded-2xl px-4 ${entry.player_id === auth.user.id ? "bg-[var(--surface-raised)] ring-1 ring-[var(--accent)]/30" : "bg-[var(--surface)]"}`}>
                   <span className="w-6 text-center font-black text-[var(--muted)]">{entry.rank}</span>
                   <span className="grid size-11 shrink-0 place-items-center rounded-full bg-[var(--surface-raised)] text-sm font-black">{initials(entry.display_name)}</span>
-                  <span className="min-w-0 flex-1">
+                  <Link href={entry.player_id === auth.user.id ? "/profile" : `/profile/${entry.player_id}`} className="min-w-0 flex-1 rounded-lg focus-visible:outline-offset-4">
                     <span className="block truncate font-black">{entry.display_name}{entry.player_id === auth.user.id ? " · toi" : ""}</span>
                     <span className="mt-1 block text-xs text-[var(--muted)]">{entry.win_rate}% de victoires</span>
-                  </span>
+                  </Link>
                   <span className="text-right text-sm font-black">
                     {entry.wins} · {entry.matches_played} · <span className={entry.goal_difference >= 0 ? "text-[var(--accent)]" : "text-red-300"}>{entry.goal_difference > 0 ? "+" : ""}{entry.goal_difference}</span>
                   </span>
