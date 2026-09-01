@@ -1,6 +1,7 @@
 ﻿import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { leaderboardModeParameter, parseLeaderboardMode, type LeaderboardMode } from "@/lib/leaderboard-mode";
 import { createClient } from "@/lib/supabase/server";
 
 type LeaderboardEntry = {
@@ -26,12 +27,23 @@ function initials(name: string) {
     .toUpperCase();
 }
 
-export default async function LeaderboardPage() {
+const MODE_TABS: { href: string; label: string; mode: LeaderboardMode }[] = [
+  { href: "/leaderboard", label: "Tous", mode: "all" },
+  { href: "/leaderboard?mode=one_v_one", label: "1 contre 1", mode: "one_v_one" },
+  { href: "/leaderboard?mode=two_v_two", label: "2 contre 2", mode: "two_v_two" },
+];
+
+type LeaderboardPageProps = {
+  searchParams: Promise<{ mode?: string | string[] }>;
+};
+
+export default async function LeaderboardPage({ searchParams }: LeaderboardPageProps) {
+  const mode = parseLeaderboardMode((await searchParams).mode);
   const supabase = await createClient();
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) redirect("/login?next=/leaderboard");
 
-  const { data, error } = await supabase.rpc("get_leaderboard");
+  const { data, error } = await supabase.rpc("get_leaderboard", { p_mode: leaderboardModeParameter(mode) });
   const entries = (data ?? []) as LeaderboardEntry[];
   const podium = entries.slice(0, 3);
 
@@ -44,6 +56,19 @@ export default async function LeaderboardPage() {
         <h1 className="mt-2 text-4xl font-black tracking-tight">Classement</h1>
         <p className="mt-3 text-[var(--muted)]">Seuls les matchs confirmés comptent dans les statistiques.</p>
       </header>
+
+      <nav className="mt-6 grid grid-cols-3 gap-2 rounded-2xl bg-[var(--surface)] p-1.5" aria-label="Mode du classement">
+        {MODE_TABS.map((tab) => (
+          <Link
+            key={tab.mode}
+            href={tab.href}
+            aria-current={mode === tab.mode ? "page" : undefined}
+            className={`grid min-h-11 place-items-center rounded-xl px-2 text-center text-sm font-bold ${mode === tab.mode ? "bg-[var(--accent)] text-[var(--accent-contrast)]" : "text-[var(--muted)]"}`}
+          >
+            {tab.label}
+          </Link>
+        ))}
+      </nav>
 
       {error ? (
         <section className="mt-8 rounded-3xl border border-red-400/20 bg-red-400/10 p-5">
