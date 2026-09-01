@@ -2,8 +2,41 @@ import Link from "next/link";
 
 import { BrandLogo } from "@/components/brand-logo";
 import { MenuLink } from "@/components/menu-link";
+import { ACTIVE_MATCH_STATUSES, activeMatchAction, type ActiveMatchStatus } from "@/lib/match-status";
+import { createClient } from "@/lib/supabase/server";
 
-export default function HomePage() {
+type ActiveMatch = {
+  id: string;
+  mode: "one_v_one" | "two_v_two";
+  status: ActiveMatchStatus;
+  target_score: number;
+  team_a_score: number;
+  team_b_score: number;
+};
+
+async function getActiveMatch(): Promise<ActiveMatch | null> {
+  try {
+    const supabase = await createClient();
+    const { data: auth } = await supabase.auth.getUser();
+    if (!auth.user) return null;
+
+    const { data } = await supabase
+      .from("matches")
+      .select("id,mode,status,target_score,team_a_score,team_b_score")
+      .in("status", ACTIVE_MATCH_STATUSES)
+      .order("updated_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    return data as ActiveMatch | null;
+  } catch {
+    return null;
+  }
+}
+
+export default async function HomePage() {
+  const activeMatch = await getActiveMatch();
+
   return (
     <div className="home-dashboard flex min-h-[calc(100dvh-4rem)] flex-col lg:grid lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:content-center lg:gap-x-14 lg:gap-y-6">
       <header className="mb-8 lg:row-span-2 lg:mb-0 lg:flex lg:flex-col lg:justify-center">
@@ -18,6 +51,25 @@ export default function HomePage() {
       </header>
 
       <section className="space-y-4" aria-label="Actions de match">
+        {activeMatch ? (
+          <Link
+            href={`/match/${activeMatch.id}`}
+            className="group flex min-h-28 items-center justify-between rounded-[2rem] border border-[var(--accent)]/35 bg-[var(--surface)] px-6 shadow-[0_18px_45px_rgb(0_0_0_/_22%)] transition active:scale-[0.98]"
+          >
+            <span>
+              <span className="block text-xs font-bold uppercase tracking-[0.18em] text-[var(--accent)]">
+                Match en cours · {activeMatch.mode === "two_v_two" ? "2 contre 2" : "1 contre 1"}
+              </span>
+              <span className="mt-1 block text-xl font-black">{activeMatchAction(activeMatch.status)}</span>
+              <span className="mt-1 block text-sm text-[var(--muted)]">
+                Score {activeMatch.team_a_score}–{activeMatch.team_b_score} · Premier à {activeMatch.target_score}
+              </span>
+            </span>
+            <span aria-hidden="true" className="grid size-12 shrink-0 place-items-center rounded-full bg-[var(--accent)] text-2xl font-black text-[var(--accent-contrast)] transition group-hover:translate-x-1">
+              →
+            </span>
+          </Link>
+        ) : null}
         <Link
           href="/match/new"
           className="group flex min-h-28 items-center justify-between overflow-hidden rounded-[2rem] bg-[var(--accent)] px-6 text-xl font-black text-[var(--accent-contrast)] shadow-[0_18px_45px_rgb(228_0_43_/_24%)] transition active:scale-[0.98]"
