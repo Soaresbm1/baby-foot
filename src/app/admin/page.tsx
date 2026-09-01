@@ -70,7 +70,13 @@ function relatedName(value: AdminAuditEntry["actor"]) {
   return profile?.display_name ?? "Utilisateur inconnu";
 }
 
-export default async function AdminPage() {
+type AdminPageProps = {
+  searchParams: Promise<{ q?: string | string[] }>;
+};
+
+export default async function AdminPage({ searchParams }: AdminPageProps) {
+  const rawQuery = (await searchParams).q;
+  const playerQuery = (Array.isArray(rawQuery) ? rawQuery[0] : rawQuery)?.trim().slice(0, 80) ?? "";
   const supabase = await createClient();
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) redirect("/login?next=/admin");
@@ -78,16 +84,18 @@ export default async function AdminPage() {
   const { data: isAdmin, error: roleError } = await supabase.rpc("current_user_is_admin");
   if (roleError || !isAdmin) notFound();
 
-  const [{ data, error }, { data: auditData, error: auditError }] = await Promise.all([
+  const [{ data, error }, { data: auditData, error: auditError }, { data: playerData, error: playerSearchError }] = await Promise.all([
     supabase.rpc("get_admin_dashboard"),
     supabase
       .from("admin_audit_log")
       .select("id,action,created_at,actor:profiles!admin_audit_log_actor_id_fkey(display_name),target:profiles!admin_audit_log_target_user_id_fkey(display_name)")
       .order("created_at", { ascending: false })
       .limit(20),
+    supabase.rpc("get_admin_players", { p_search: playerQuery || null }),
   ]);
   const dashboard = data as AdminDashboard | null;
   const auditEntries = (auditData ?? []) as AdminAuditEntry[];
+  const players = playerSearchError ? (dashboard?.players ?? []) : (playerData ?? []) as AdminPlayer[];
 
   return (
     <div>
@@ -142,11 +150,20 @@ export default async function AdminPage() {
 
           <section className="mt-10" aria-labelledby="admin-players">
             <div className="flex items-end justify-between gap-4">
-              <div><p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--accent)]">Communauté</p><h2 id="admin-players" className="mt-1 text-xl font-black">Joueurs récents</h2></div>
-              <span className="text-xs font-bold text-[var(--muted)]">20 derniers</span>
+              <div><p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--accent)]">Communauté</p><h2 id="admin-players" className="mt-1 text-xl font-black">Joueurs</h2></div>
+              <span className="text-xs font-bold text-[var(--muted)]">{players.length} résultat{players.length === 1 ? "" : "s"}</span>
             </div>
-            <ul className="mt-4 divide-y divide-white/5 overflow-hidden rounded-3xl bg-[var(--surface)]">
-              {dashboard.players.map((player) => (
+            <form action="/admin" method="get" className="mt-4 flex gap-2 rounded-2xl bg-[var(--surface)] p-2" role="search">
+              <label htmlFor="player-search" className="sr-only">Rechercher un joueur</label>
+              <input id="player-search" name="q" type="search" defaultValue={playerQuery} maxLength={80} placeholder="Nom ou adresse e-mail" className="min-h-12 min-w-0 flex-1 rounded-xl bg-[var(--surface-raised)] px-4 text-sm outline-none placeholder:text-[var(--muted)]" />
+              <button type="submit" className="min-h-12 rounded-xl bg-[var(--accent)] px-4 text-sm font-black text-[var(--accent-contrast)]">Rechercher</button>
+            </form>
+            {playerQuery ? <Link href="/admin" className="mt-3 inline-block text-sm font-bold text-[var(--muted)]">Effacer la recherche</Link> : null}
+            {playerSearchError ? <p className="mt-3 text-xs text-amber-200">Applique la migration de recherche pour afficher plus de 20 joueurs.</p> : null}
+            {players.length === 0 ? (
+              <p className="mt-4 rounded-3xl bg-[var(--surface)] p-5 text-sm text-[var(--muted)]">Aucun joueur ne correspond à cette recherche.</p>
+            ) : <ul className="mt-4 divide-y divide-white/5 overflow-hidden rounded-3xl bg-[var(--surface)]">
+              {players.map((player) => (
                 <li key={player.id} className="flex min-h-20 items-center gap-3 px-4 py-3">
                   <span aria-hidden="true" className="grid size-10 shrink-0 place-items-center rounded-full bg-[var(--surface-raised)] font-black">{player.display_name.slice(0, 1).toUpperCase()}</span>
                   <span className="min-w-0 flex-1"><strong className="block truncate text-sm">{player.display_name}{player.is_admin ? " · Admin" : ""}</strong><span className="mt-1 block truncate text-xs text-[var(--muted)]">{player.email}</span></span>
@@ -158,7 +175,7 @@ export default async function AdminPage() {
                   )}
                 </li>
               ))}
-            </ul>
+            </ul>}
           </section>
 
           <section className="mt-10" aria-labelledby="admin-audit">
