@@ -47,6 +47,15 @@ type AdminAuditEntry = {
   target: { display_name: string } | { display_name: string }[] | null;
 };
 
+type AdminMatchFilter = "all" | "active" | "completed" | "cancelled";
+
+const matchFilters: { label: string; value: AdminMatchFilter }[] = [
+  { label: "Tous", value: "all" },
+  { label: "Actifs", value: "active" },
+  { label: "Terminés", value: "completed" },
+  { label: "Annulés", value: "cancelled" },
+];
+
 const statusLabels: Record<string, string> = {
   waiting_for_players: "En attente de joueurs",
   waiting_for_ready: "En attente de validation",
@@ -70,13 +79,28 @@ function relatedName(value: AdminAuditEntry["actor"]) {
   return profile?.display_name ?? "Utilisateur inconnu";
 }
 
+function parseMatchFilter(value: string | string[] | undefined): AdminMatchFilter {
+  const candidate = Array.isArray(value) ? value[0] : value;
+  return candidate === "active" || candidate === "completed" || candidate === "cancelled" ? candidate : "all";
+}
+
+function adminHref(playerQuery: string, matchFilter: AdminMatchFilter) {
+  const parameters = new URLSearchParams();
+  if (playerQuery) parameters.set("q", playerQuery);
+  if (matchFilter !== "all") parameters.set("status", matchFilter);
+  const query = parameters.toString();
+  return query ? `/admin?${query}` : "/admin";
+}
+
 type AdminPageProps = {
-  searchParams: Promise<{ q?: string | string[] }>;
+  searchParams: Promise<{ q?: string | string[]; status?: string | string[] }>;
 };
 
 export default async function AdminPage({ searchParams }: AdminPageProps) {
-  const rawQuery = (await searchParams).q;
+  const parameters = await searchParams;
+  const rawQuery = parameters.q;
   const playerQuery = (Array.isArray(rawQuery) ? rawQuery[0] : rawQuery)?.trim().slice(0, 80) ?? "";
+  const matchFilter = parseMatchFilter(parameters.status);
   const supabase = await createClient();
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) redirect("/login?next=/admin");
@@ -84,7 +108,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
   const { data: isAdmin, error: roleError } = await supabase.rpc("current_user_is_admin");
   if (roleError || !isAdmin) notFound();
 
-  const [{ data, error }, { data: auditData, error: auditError }, { data: playerData, error: playerSearchError }] = await Promise.all([
+  const [{ data, error }, { data: auditData, error: auditError }, { data: playerData, error: playerSearchError }, { data: matchData, error: matchFilterError }] = await Promise.all([
     supabase.rpc("get_admin_dashboard"),
     supabase
       .from("admin_audit_log")
@@ -92,10 +116,12 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
       .order("created_at", { ascending: false })
       .limit(20),
     supabase.rpc("get_admin_players", { p_search: playerQuery || null }),
+    supabase.rpc("get_admin_matches", { p_filter: matchFilter }),
   ]);
   const dashboard = data as AdminDashboard | null;
   const auditEntries = (auditData ?? []) as AdminAuditEntry[];
   const players = playerSearchError ? (dashboard?.players ?? []) : (playerData ?? []) as AdminPlayer[];
+  const matches = matchFilterError ? (dashboard?.matches ?? []) : (matchData ?? []) as AdminMatch[];
 
   return (
     <div>
@@ -131,10 +157,18 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
           <section className="mt-10" aria-labelledby="admin-matches">
             <div className="flex items-end justify-between gap-4">
               <div><p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--accent)]">Activité</p><h2 id="admin-matches" className="mt-1 text-xl font-black">Matchs récents</h2></div>
-              <span className="text-xs font-bold text-[var(--muted)]">20 derniers</span>
+              <span className="text-xs font-bold text-[var(--muted)]">{matches.length} résultat{matches.length === 1 ? "" : "s"}</span>
             </div>
-            <ol className="mt-4 space-y-3">
-              {dashboard.matches.map((match) => (
+            <nav className="mt-4 grid grid-cols-4 gap-1 rounded-2xl bg-[var(--surface)] p-1.5" aria-label="Filtrer les matchs">
+              {matchFilters.map((filter) => (
+                <Link key={filter.value} href={adminHref(playerQuery, filter.value)} aria-current={matchFilter === filter.value ? "page" : undefined} className={`grid min-h-11 place-items-center rounded-xl px-1 text-center text-xs font-bold ${matchFilter === filter.value ? "bg-[var(--accent)] text-[var(--accent-contrast)]" : "text-[var(--muted)]"}`}>{filter.label}</Link>
+              ))}
+            </nav>
+            {matchFilterError ? <p className="mt-3 text-xs text-amber-200">Applique la migration des filtres pour afficher jusqu’à 50 matchs.</p> : null}
+            {matches.length === 0 ? (
+              <p className="mt-4 rounded-3xl bg-[var(--surface)] p-5 text-sm text-[var(--muted)]">Aucun match ne correspond à ce filtre.</p>
+            ) : <ol className="mt-4 space-y-3">
+              {matches.map((match) => (
                 <li key={match.id} className="flex min-h-24 items-center gap-4 rounded-3xl bg-[var(--surface)] p-4">
                     <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[var(--surface-raised)] font-black tabular-nums">{match.team_a_score}–{match.team_b_score}</span>
                     <span className="min-w-0 flex-1">
@@ -145,7 +179,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
                     {match.status !== "completed" && match.status !== "cancelled" ? <AdminCancelMatchButton matchId={match.id} /> : null}
                 </li>
               ))}
-            </ol>
+            </ol>}
           </section>
 
           <section className="mt-10" aria-labelledby="admin-players">
@@ -154,11 +188,12 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
               <span className="text-xs font-bold text-[var(--muted)]">{players.length} résultat{players.length === 1 ? "" : "s"}</span>
             </div>
             <form action="/admin" method="get" className="mt-4 flex gap-2 rounded-2xl bg-[var(--surface)] p-2" role="search">
+              {matchFilter !== "all" ? <input type="hidden" name="status" value={matchFilter} /> : null}
               <label htmlFor="player-search" className="sr-only">Rechercher un joueur</label>
               <input id="player-search" name="q" type="search" defaultValue={playerQuery} maxLength={80} placeholder="Nom ou adresse e-mail" className="min-h-12 min-w-0 flex-1 rounded-xl bg-[var(--surface-raised)] px-4 text-sm outline-none placeholder:text-[var(--muted)]" />
               <button type="submit" className="min-h-12 rounded-xl bg-[var(--accent)] px-4 text-sm font-black text-[var(--accent-contrast)]">Rechercher</button>
             </form>
-            {playerQuery ? <Link href="/admin" className="mt-3 inline-block text-sm font-bold text-[var(--muted)]">Effacer la recherche</Link> : null}
+            {playerQuery ? <Link href={adminHref("", matchFilter)} className="mt-3 inline-block text-sm font-bold text-[var(--muted)]">Effacer la recherche</Link> : null}
             {playerSearchError ? <p className="mt-3 text-xs text-amber-200">Applique la migration de recherche pour afficher plus de 20 joueurs.</p> : null}
             {players.length === 0 ? (
               <p className="mt-4 rounded-3xl bg-[var(--surface)] p-5 text-sm text-[var(--muted)]">Aucun joueur ne correspond à cette recherche.</p>
