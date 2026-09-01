@@ -2,6 +2,7 @@
 import { redirect } from "next/navigation";
 
 import { ProfileForm } from "@/components/profile-form";
+import { ChangePasswordForm } from "@/components/change-password-form";
 import { InstallAppButton } from "@/components/install-app-button";
 import { SignOutButton } from "@/components/sign-out-button";
 import { getAchievements } from "@/lib/achievements";
@@ -142,6 +143,7 @@ export default async function ProfilePage() {
       </section>
 
       <ProfileForm initialAvatarUrl={profile.avatar_url ?? ""} initialDisplayName={profile.display_name} />
+      <ChangePasswordForm email={profile.email} />
 
       <div className="mt-4 grid grid-cols-2 gap-3">
         <Link href="/history" className="flex min-h-14 items-center justify-center rounded-2xl bg-[var(--surface)] px-4 font-bold">Historique</Link>
