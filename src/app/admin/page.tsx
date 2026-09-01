@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
+import { AdminCancelMatchButton } from "@/components/admin-cancel-match-button";
 import { createClient } from "@/lib/supabase/server";
 
 type AdminStatistics = {
@@ -111,6 +112,7 @@ export default async function AdminPage() {
                       <span className="mt-1 block text-xs text-[var(--muted)]">{statusLabels[match.status] ?? match.status} · {match.mode === "one_v_one" ? "1 contre 1" : "2 contre 2"}</span>
                       <span className="mt-1 block text-xs text-[var(--muted)]">{formatDate(match.created_at)} · {match.participant_count} joueur{match.participant_count === 1 ? "" : "s"}</span>
                     </span>
+                    {match.status !== "completed" && match.status !== "cancelled" ? <AdminCancelMatchButton matchId={match.id} /> : null}
                 </li>
               ))}
             </ol>
