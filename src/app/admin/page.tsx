@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
 import { AdminCancelMatchButton } from "@/components/admin-cancel-match-button";
+import { AdminRoleButton } from "@/components/admin-role-button";
 import { createClient } from "@/lib/supabase/server";
 
 type AdminStatistics = {
@@ -129,6 +130,11 @@ export default async function AdminPage() {
                   <span aria-hidden="true" className="grid size-10 shrink-0 place-items-center rounded-full bg-[var(--surface-raised)] font-black">{player.display_name.slice(0, 1).toUpperCase()}</span>
                   <span className="min-w-0 flex-1"><strong className="block truncate text-sm">{player.display_name}{player.is_admin ? " · Admin" : ""}</strong><span className="mt-1 block truncate text-xs text-[var(--muted)]">{player.email}</span></span>
                   <span className="shrink-0 text-right"><strong className="block text-sm">{player.matches_played}</strong><span className="text-[10px] text-[var(--muted)]">matchs</span></span>
+                  {player.id === auth.user.id ? (
+                    <span className="shrink-0 rounded-xl bg-[var(--accent)]/15 px-3 py-2 text-xs font-black text-[var(--accent)]">Vous</span>
+                  ) : (
+                    <AdminRoleButton isAdmin={player.is_admin} playerId={player.id} playerName={player.display_name} />
+                  )}
                 </li>
               ))}
             </ul>
