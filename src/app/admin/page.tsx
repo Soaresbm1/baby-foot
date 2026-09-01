@@ -41,7 +41,7 @@ type AdminDashboard = {
 
 type AdminAuditEntry = {
   id: string;
-  action: "admin_granted" | "admin_revoked";
+  action: "admin_granted" | "admin_revoked" | "match_cancelled";
   created_at: string;
   actor: { display_name: string } | { display_name: string }[] | null;
   target: { display_name: string } | { display_name: string }[] | null;
@@ -163,7 +163,7 @@ export default async function AdminPage() {
 
           <section className="mt-10" aria-labelledby="admin-audit">
             <div className="flex items-end justify-between gap-4">
-              <div><p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--accent)]">Sécurité</p><h2 id="admin-audit" className="mt-1 text-xl font-black">Journal des droits</h2></div>
+              <div><p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--accent)]">Sécurité</p><h2 id="admin-audit" className="mt-1 text-xl font-black">Journal des actions</h2></div>
               <span className="text-xs font-bold text-[var(--muted)]">20 derniers</span>
             </div>
             {auditError ? (
@@ -174,10 +174,10 @@ export default async function AdminPage() {
               <ol className="mt-4 divide-y divide-white/5 overflow-hidden rounded-3xl bg-[var(--surface)]">
                 {auditEntries.map((entry) => (
                   <li key={entry.id} className="flex min-h-20 items-center gap-3 px-4 py-3">
-                    <span aria-hidden="true" className={`grid size-10 shrink-0 place-items-center rounded-full font-black ${entry.action === "admin_granted" ? "bg-[var(--accent)]/15 text-[var(--accent)]" : "bg-red-400/10 text-red-300"}`}>{entry.action === "admin_granted" ? "+" : "−"}</span>
+                    <span aria-hidden="true" className={`grid size-10 shrink-0 place-items-center rounded-full font-black ${entry.action === "admin_granted" ? "bg-[var(--accent)]/15 text-[var(--accent)]" : "bg-red-400/10 text-red-300"}`}>{entry.action === "admin_granted" ? "+" : entry.action === "admin_revoked" ? "−" : "×"}</span>
                     <span className="min-w-0 flex-1 text-sm">
                       <strong>{relatedName(entry.actor)}</strong>
-                      <span className="text-[var(--muted)]"> {entry.action === "admin_granted" ? "a donné les droits à" : "a retiré les droits de"} </span>
+                      <span className="text-[var(--muted)]"> {entry.action === "admin_granted" ? "a donné les droits à" : entry.action === "admin_revoked" ? "a retiré les droits de" : "a annulé le match créé par"} </span>
                       <strong>{relatedName(entry.target)}</strong>
                       <span className="mt-1 block text-xs text-[var(--muted)]">{formatDate(entry.created_at)}</span>
                     </span>
