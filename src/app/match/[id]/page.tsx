@@ -7,6 +7,7 @@ import { MatchInvitation } from "@/components/match-invitation";
 import { MatchRealtimeRefresh } from "@/components/match-realtime-refresh";
 import { ReadyButton } from "@/components/ready-button";
 import { ScoreCounter } from "@/components/score-counter";
+import { TeamOrganizer } from "@/components/team-organizer";
 import { createClient } from "@/lib/supabase/server";
 
 type MatchPageProps = { params: Promise<{ id: string }> };
@@ -22,7 +23,7 @@ export default async function MatchPage({ params }: MatchPageProps) {
     .eq("id", id).single();
   if (!match) notFound();
   const { data: participants } = await supabase.from("match_participants")
-    .select("user_id,is_ready,team_id,seat,profiles(display_name),match_teams(side)").eq("match_id", id).order("seat");
+    .select("id,user_id,is_ready,team_id,seat,profiles(display_name),match_teams(side)").eq("match_id", id).order("seat");
   const mine = participants?.find((participant) => participant.user_id === auth.user.id);
   const myTeam = mine && (Array.isArray(mine.match_teams) ? mine.match_teams[0] : mine.match_teams);
   const profileName = (participant: NonNullable<typeof participants>[number]) => {
@@ -65,6 +66,15 @@ export default async function MatchPage({ params }: MatchPageProps) {
             </div>;
           })}
         </div>
+      ) : null}
+      {match.mode === "two_v_two" && (match.status === "waiting_for_players" || match.status === "waiting_for_ready") && match.created_by === auth.user.id ? (
+        <TeamOrganizer
+          matchId={id}
+          players={(participants ?? []).map((participant) => {
+            const team = Array.isArray(participant.match_teams) ? participant.match_teams[0] : participant.match_teams;
+            return { id: participant.id, name: profileName(participant), side: team?.side ?? 1 };
+          })}
+        />
       ) : null}
       {match.status === "waiting_for_players" ? <p className="mt-6 text-center text-[var(--muted)]">En attente de {match.mode === "two_v_two" ? `${4 - (participants?.length ?? 0)} joueur${4 - (participants?.length ?? 0) > 1 ? "s" : ""}` : "l’adversaire"}…</p> : null}
       {match.status === "waiting_for_players" && match.created_by === auth.user.id ? <MatchInvitation matchId={id} /> : null}

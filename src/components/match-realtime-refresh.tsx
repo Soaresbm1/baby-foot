@@ -17,6 +17,7 @@ const DETAILS: Record<ConnectionState, { color: string; label: string }> = {
 const EVENT_NOTIFICATIONS: Record<string, { icon: string; message: string }> = {
   player_joined: { icon: "👋", message: "Un joueur a rejoint le match" },
   player_left: { icon: "←", message: "Un joueur a quitté le match" },
+  player_moved: { icon: "↔", message: "La composition des équipes a changé" },
   player_ready: { icon: "✓", message: "Un joueur a modifié sa préparation" },
   match_started: { icon: "▶", message: "Tous les joueurs sont prêts. Le match commence !" },
   goal: { icon: "+1", message: "Le score vient de changer" },
