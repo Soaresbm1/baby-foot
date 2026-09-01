@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
+import { CancelMatchButton } from "@/components/cancel-match-button";
 import { MatchRealtimeRefresh } from "@/components/match-realtime-refresh";
 import { ReadyButton } from "@/components/ready-button";
 import { ScoreCounter } from "@/components/score-counter";
@@ -15,7 +16,7 @@ export default async function MatchPage({ params }: MatchPageProps) {
   if (!auth.user) redirect(`/login?next=${encodeURIComponent(`/match/${id}`)}`);
 
   const { data: match } = await supabase.from("matches")
-    .select("id,mode,status,target_score,team_a_score,team_b_score,winner_team_id")
+    .select("id,mode,status,target_score,team_a_score,team_b_score,winner_team_id,created_by")
     .eq("id", id).single();
   if (!match) notFound();
   const { data: participants } = await supabase.from("match_participants")
@@ -65,6 +66,7 @@ export default async function MatchPage({ params }: MatchPageProps) {
       ) : null}
       {match.status === "waiting_for_players" ? <p className="mt-6 text-center text-[var(--muted)]">En attente de {match.mode === "two_v_two" ? `${4 - (participants?.length ?? 0)} joueur${4 - (participants?.length ?? 0) > 1 ? "s" : ""}` : "l’adversaire"}…</p> : null}
       {match.status === "waiting_for_ready" && mine ? <ReadyButton matchId={id} initialReady={mine.is_ready} /> : null}
+      {(match.status === "waiting_for_players" || match.status === "waiting_for_ready") && match.created_by === auth.user.id ? <CancelMatchButton matchId={id} /> : null}
       {(match.status === "in_progress" || match.status === "awaiting_confirmation" || match.status === "completed" || match.status === "cancelled") && mine && myTeam ? (
         <ScoreCounter
           confirmed={Boolean(confirmation)} matchId={id}
