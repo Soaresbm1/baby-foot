@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { InviteQrCode } from "@/components/invite-qr-code";
+import { ShareMatchResult } from "@/components/share-match-result";
 import { createClient } from "@/lib/supabase/client";
 
 type Props = {
@@ -94,6 +95,7 @@ export function ScoreCounter(props: Props) {
       <p className="mt-3 text-xl text-[var(--muted)]">{props.myScore} – {props.opponentScore}</p>
       {error ? <p role="alert" className="mt-4 text-sm text-red-300">{error}</p> : null}
       <button type="button" onClick={createRematch} disabled={sending} className="mt-6 min-h-14 w-full rounded-2xl bg-[var(--accent)] font-black text-[var(--accent-contrast)] disabled:opacity-60">{sending ? "Création…" : "Faire une revanche"}</button>
+      {props.status === "completed" ? <ShareMatchResult teamA={props.myName} teamAScore={props.myScore} teamB={props.opponentName} teamBScore={props.opponentScore} /> : null}
     </section>
   );
 

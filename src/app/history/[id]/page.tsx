@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
+import { ShareMatchResult } from "@/components/share-match-result";
 import { createClient } from "@/lib/supabase/server";
 
 type MatchDetailPageProps = { params: Promise<{ id: string }> };
@@ -92,6 +93,14 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
         </div>
         {winningSide ? <p className="mt-5 border-t border-white/5 pt-4 text-center text-sm font-bold text-[var(--accent)]">Victoire de l’équipe {winningSide === 1 ? "A" : "B"}</p> : null}
         {match.status === "cancelled" ? <p className="mt-5 border-t border-white/5 pt-4 text-center text-sm text-[var(--muted)]">Résultat refusé par un participant</p> : null}
+        {match.status === "completed" ? (
+          <ShareMatchResult
+            teamA={teams[0].players.map((participant) => related(participant.profiles)?.display_name ?? "Joueur").join(" & ")}
+            teamAScore={match.team_a_score}
+            teamB={teams[1].players.map((participant) => related(participant.profiles)?.display_name ?? "Joueur").join(" & ")}
+            teamBScore={match.team_b_score}
+          />
+        ) : null}
       </section>
 
       <section className="mt-8" aria-labelledby="timeline-title">
