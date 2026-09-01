@@ -1,6 +1,7 @@
 ﻿import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { historyFilterHref, parseHistoryFilters, type HistoryMode, type HistoryResult } from "@/lib/history-filter";
 import { createClient } from "@/lib/supabase/server";
 
 type HistoryEntry = {
@@ -31,13 +32,34 @@ function formatDate(value: string) {
   }).format(new Date(value));
 }
 
-export default async function HistoryPage() {
+const MODE_FILTERS: { label: string; value: HistoryMode }[] = [
+  { label: "Tous", value: "all" },
+  { label: "1 contre 1", value: "one_v_one" },
+  { label: "2 contre 2", value: "two_v_two" },
+];
+
+const RESULT_FILTERS: { label: string; value: HistoryResult }[] = [
+  { label: "Tous", value: "all" },
+  { label: "Victoires", value: "won" },
+  { label: "Défaites", value: "lost" },
+];
+
+type HistoryPageProps = {
+  searchParams: Promise<{ mode?: string | string[]; result?: string | string[] }>;
+};
+
+export default async function HistoryPage({ searchParams }: HistoryPageProps) {
+  const filters = parseHistoryFilters(await searchParams);
   const supabase = await createClient();
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) redirect("/login?next=/history");
 
   const { data, error } = await supabase.rpc("get_my_match_history");
-  const matches = (data ?? []) as HistoryEntry[];
+  const allMatches = (data ?? []) as HistoryEntry[];
+  const matches = allMatches.filter((match) =>
+    (filters.mode === "all" || match.mode === filters.mode)
+    && (filters.result === "all" || match.result === filters.result)
+  );
   const completed = matches.filter((match) => match.result !== "cancelled");
   const wins = matches.filter((match) => match.result === "won").length;
   const winRate = completed.length ? Math.round((wins / completed.length) * 100) : 0;
@@ -50,6 +72,25 @@ export default async function HistoryPage() {
         <p className="text-sm font-bold uppercase tracking-[0.22em] text-[var(--accent)]">Tes performances</p>
         <h1 className="mt-2 text-4xl font-black tracking-tight">Historique</h1>
       </header>
+
+      {!error && allMatches.length > 0 ? (
+        <section className="mt-6 space-y-3" aria-label="Filtres de l’historique">
+          <nav className="grid grid-cols-3 gap-1.5 rounded-2xl bg-[var(--surface)] p-1.5" aria-label="Mode de jeu">
+            {MODE_FILTERS.map((filter) => (
+              <Link key={filter.value} href={historyFilterHref({ ...filters, mode: filter.value })} aria-current={filters.mode === filter.value ? "page" : undefined} className={`grid min-h-11 place-items-center rounded-xl px-2 text-center text-sm font-bold ${filters.mode === filter.value ? "bg-[var(--accent)] text-[var(--accent-contrast)]" : "text-[var(--muted)]"}`}>
+                {filter.label}
+              </Link>
+            ))}
+          </nav>
+          <nav className="grid grid-cols-3 gap-1.5 rounded-2xl bg-[var(--surface)] p-1.5" aria-label="Résultat">
+            {RESULT_FILTERS.map((filter) => (
+              <Link key={filter.value} href={historyFilterHref({ ...filters, result: filter.value })} aria-current={filters.result === filter.value ? "page" : undefined} className={`grid min-h-11 place-items-center rounded-xl px-2 text-center text-sm font-bold ${filters.result === filter.value ? "bg-[var(--surface-raised)] text-white" : "text-[var(--muted)]"}`}>
+                {filter.label}
+              </Link>
+            ))}
+          </nav>
+        </section>
+      ) : null}
 
       {!error && matches.length > 0 ? (
         <section className="mt-8 grid grid-cols-3 gap-3" aria-label="Résumé personnel">
@@ -73,12 +114,18 @@ export default async function HistoryPage() {
           <h2 className="font-black text-red-200">Historique indisponible</h2>
           <p className="mt-2 text-sm text-red-200/70">La migration de l’historique doit être appliquée dans Supabase.</p>
         </section>
-      ) : matches.length === 0 ? (
+      ) : allMatches.length === 0 ? (
         <section className="mt-8 rounded-3xl bg-[var(--surface)] p-8 text-center">
           <div aria-hidden="true" className="mx-auto grid size-16 place-items-center rounded-full bg-[var(--surface-raised)] text-3xl">↺</div>
           <h2 className="mt-5 text-xl font-black">Aucun match terminé</h2>
           <p className="mt-2 text-sm text-[var(--muted)]">Tes résultats confirmés apparaîtront ici.</p>
           <Link href="/match/new" className="mt-6 flex min-h-14 items-center justify-center rounded-2xl bg-[var(--accent)] px-5 font-black text-[var(--accent-contrast)]">Jouer maintenant</Link>
+        </section>
+      ) : matches.length === 0 ? (
+        <section className="mt-8 rounded-3xl bg-[var(--surface)] p-8 text-center">
+          <h2 className="text-xl font-black">Aucun résultat pour ces filtres</h2>
+          <p className="mt-2 text-sm text-[var(--muted)]">Essaie une autre combinaison ou affiche tous tes matchs.</p>
+          <Link href="/history" className="mt-6 flex min-h-14 items-center justify-center rounded-2xl bg-[var(--surface-raised)] px-5 font-bold">Réinitialiser les filtres</Link>
         </section>
       ) : (
         <section className="mt-8" aria-labelledby="match-list">
