@@ -26,6 +26,19 @@ npm run dev
 Renseigner dans `.env.local` l'URL et la clé publique affichées par `supabase status`.
 L'application est ensuite disponible sur <http://localhost:3000>.
 
+## Premier administrateur
+
+Après avoir appliqué la migration `20260901150000_admin_dashboard.sql`, désigner le
+premier administrateur depuis l’éditeur SQL de Supabase :
+
+```sql
+update public.profiles
+set is_admin = true
+where lower(email) = lower('votre.adresse@example.com');
+```
+
+Le lien **Admin** apparaît ensuite sur l’accueil de ce compte.
+
 ## Commandes de qualité
 
 ```bash

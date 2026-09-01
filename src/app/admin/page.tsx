@@ -1,0 +1,138 @@
+import Link from "next/link";
+import { notFound, redirect } from "next/navigation";
+
+import { createClient } from "@/lib/supabase/server";
+
+type AdminStatistics = {
+  players: number;
+  matches: number;
+  completed_matches: number;
+  active_matches: number;
+};
+
+type AdminPlayer = {
+  id: string;
+  display_name: string;
+  email: string;
+  is_admin: boolean;
+  created_at: string;
+  matches_played: number;
+};
+
+type AdminMatch = {
+  id: string;
+  mode: "one_v_one" | "two_v_two";
+  status: string;
+  team_a_score: number;
+  team_b_score: number;
+  target_score: number;
+  created_at: string;
+  creator_name: string;
+  participant_count: number;
+};
+
+type AdminDashboard = {
+  statistics: AdminStatistics;
+  players: AdminPlayer[];
+  matches: AdminMatch[];
+};
+
+const statusLabels: Record<string, string> = {
+  waiting_for_players: "En attente de joueurs",
+  waiting_for_ready: "En attente de validation",
+  in_progress: "En cours",
+  awaiting_confirmation: "Résultat à confirmer",
+  completed: "Terminé",
+  cancelled: "Annulé",
+};
+
+function formatDate(value: string) {
+  return new Intl.DateTimeFormat("fr-CH", {
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(value));
+}
+
+export default async function AdminPage() {
+  const supabase = await createClient();
+  const { data: auth } = await supabase.auth.getUser();
+  if (!auth.user) redirect("/login?next=/admin");
+
+  const { data: isAdmin, error: roleError } = await supabase.rpc("current_user_is_admin");
+  if (roleError || !isAdmin) notFound();
+
+  const { data, error } = await supabase.rpc("get_admin_dashboard");
+  const dashboard = data as AdminDashboard | null;
+
+  return (
+    <div>
+      <Link href="/" className="text-sm font-bold text-[var(--muted)]">← Accueil</Link>
+
+      <header className="mt-10">
+        <p className="text-sm font-bold uppercase tracking-[0.22em] text-[var(--accent)]">Administration</p>
+        <h1 className="mt-2 text-4xl font-black tracking-tight">Tableau de bord</h1>
+        <p className="mt-2 text-sm leading-6 text-[var(--muted)]">Vue d’ensemble de l’activité de l’application.</p>
+      </header>
+
+      {error || !dashboard ? (
+        <section className="mt-8 rounded-3xl border border-red-400/20 bg-red-400/10 p-5">
+          <h2 className="font-black text-red-200">Administration indisponible</h2>
+          <p className="mt-2 text-sm text-red-200/70">Vérifie que la migration d’administration est appliquée dans Supabase.</p>
+        </section>
+      ) : (
+        <>
+          <section className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4" aria-label="Résumé de l’application">
+            {[
+              ["Joueurs", dashboard.statistics.players],
+              ["Matchs", dashboard.statistics.matches],
+              ["Terminés", dashboard.statistics.completed_matches],
+              ["Actifs", dashboard.statistics.active_matches],
+            ].map(([label, value]) => (
+              <div key={label} className="rounded-2xl bg-[var(--surface)] p-4 text-center">
+                <strong className="block text-2xl font-black">{value}</strong>
+                <span className="mt-1 block text-xs text-[var(--muted)]">{label}</span>
+              </div>
+            ))}
+          </section>
+
+          <section className="mt-10" aria-labelledby="admin-matches">
+            <div className="flex items-end justify-between gap-4">
+              <div><p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--accent)]">Activité</p><h2 id="admin-matches" className="mt-1 text-xl font-black">Matchs récents</h2></div>
+              <span className="text-xs font-bold text-[var(--muted)]">20 derniers</span>
+            </div>
+            <ol className="mt-4 space-y-3">
+              {dashboard.matches.map((match) => (
+                <li key={match.id} className="flex min-h-24 items-center gap-4 rounded-3xl bg-[var(--surface)] p-4">
+                    <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[var(--surface-raised)] font-black tabular-nums">{match.team_a_score}–{match.team_b_score}</span>
+                    <span className="min-w-0 flex-1">
+                      <strong className="block truncate">{match.creator_name}</strong>
+                      <span className="mt-1 block text-xs text-[var(--muted)]">{statusLabels[match.status] ?? match.status} · {match.mode === "one_v_one" ? "1 contre 1" : "2 contre 2"}</span>
+                      <span className="mt-1 block text-xs text-[var(--muted)]">{formatDate(match.created_at)} · {match.participant_count} joueur{match.participant_count === 1 ? "" : "s"}</span>
+                    </span>
+                </li>
+              ))}
+            </ol>
+          </section>
+
+          <section className="mt-10" aria-labelledby="admin-players">
+            <div className="flex items-end justify-between gap-4">
+              <div><p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--accent)]">Communauté</p><h2 id="admin-players" className="mt-1 text-xl font-black">Joueurs récents</h2></div>
+              <span className="text-xs font-bold text-[var(--muted)]">20 derniers</span>
+            </div>
+            <ul className="mt-4 divide-y divide-white/5 overflow-hidden rounded-3xl bg-[var(--surface)]">
+              {dashboard.players.map((player) => (
+                <li key={player.id} className="flex min-h-20 items-center gap-3 px-4 py-3">
+                  <span aria-hidden="true" className="grid size-10 shrink-0 place-items-center rounded-full bg-[var(--surface-raised)] font-black">{player.display_name.slice(0, 1).toUpperCase()}</span>
+                  <span className="min-w-0 flex-1"><strong className="block truncate text-sm">{player.display_name}{player.is_admin ? " · Admin" : ""}</strong><span className="mt-1 block truncate text-xs text-[var(--muted)]">{player.email}</span></span>
+                  <span className="shrink-0 text-right"><strong className="block text-sm">{player.matches_played}</strong><span className="text-[10px] text-[var(--muted)]">matchs</span></span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        </>
+      )}
+    </div>
+  );
+}
