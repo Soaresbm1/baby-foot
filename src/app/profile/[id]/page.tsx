@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
+import { ChallengePlayer } from "@/components/challenge-player";
 import { createClient } from "@/lib/supabase/server";
 
 type PlayerStatistics = {
@@ -84,6 +85,8 @@ export default async function PlayerProfilePage({ params }: PlayerProfilePagePro
           </>
         ) : <p className="mt-4 text-sm text-[var(--muted)]">Vous ne vous êtes pas encore affrontés dans un match confirmé.</p>}
       </section>
+
+      <ChallengePlayer opponentId={id} opponentName={profile.display_name} />
     </div>
   );
 }
