@@ -93,6 +93,7 @@ export default async function HomePage() {
           </span>
         </Link>
         <MenuLink href="/join" label="Rejoindre un match" detail="Scanner un QR code" icon="▦" />
+        <MenuLink href="/challenges" label="Défis reçus" detail="Voir les invitations privées" icon="⚔" />
       </section>
 
       <nav className={`mt-auto grid ${isAdmin ? "grid-cols-5" : "grid-cols-4"} gap-1 rounded-3xl border border-white/5 bg-[var(--surface)]/90 p-2 shadow-[0_18px_45px_rgb(0_0_0_/_22%)] backdrop-blur lg:col-start-2 lg:mt-0`} aria-label="Navigation principale">
