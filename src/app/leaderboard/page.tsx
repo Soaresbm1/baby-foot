@@ -18,6 +18,14 @@ type LeaderboardEntry = {
   rank: number;
 };
 
+type Season = {
+  id: string;
+  name: string;
+  starts_at: string;
+  ends_at: string | null;
+  is_active: boolean;
+};
+
 function initials(name: string) {
   return name
     .split(/\s+/)
@@ -27,23 +35,44 @@ function initials(name: string) {
     .toUpperCase();
 }
 
-const MODE_TABS: { href: string; label: string; mode: LeaderboardMode }[] = [
-  { href: "/leaderboard", label: "Tous", mode: "all" },
-  { href: "/leaderboard?mode=one_v_one", label: "1 contre 1", mode: "one_v_one" },
-  { href: "/leaderboard?mode=two_v_two", label: "2 contre 2", mode: "two_v_two" },
+const MODE_TABS: { label: string; mode: LeaderboardMode }[] = [
+  { label: "Tous", mode: "all" },
+  { label: "1 contre 1", mode: "one_v_one" },
+  { label: "2 contre 2", mode: "two_v_two" },
 ];
 
 type LeaderboardPageProps = {
-  searchParams: Promise<{ mode?: string | string[] }>;
+  searchParams: Promise<{ mode?: string | string[]; season?: string | string[] }>;
 };
 
+function parameter(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+function leaderboardHref(mode: LeaderboardMode, seasonId?: string) {
+  const query = new URLSearchParams();
+  if (mode !== "all") query.set("mode", mode);
+  if (seasonId) query.set("season", seasonId);
+  return query.size ? `/leaderboard?${query}` : "/leaderboard";
+}
+
 export default async function LeaderboardPage({ searchParams }: LeaderboardPageProps) {
-  const mode = parseLeaderboardMode((await searchParams).mode);
+  const parameters = await searchParams;
+  const mode = parseLeaderboardMode(parameters.mode);
   const supabase = await createClient();
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) redirect("/login?next=/leaderboard");
 
-  const { data, error } = await supabase.rpc("get_leaderboard", { p_mode: leaderboardModeParameter(mode) });
+  const seasonsResult = await supabase.from("seasons").select("id,name,starts_at,ends_at,is_active").order("starts_at", { ascending: false });
+  const seasons = (seasonsResult.data ?? []) as Season[];
+  const requestedSeasonId = parameter(parameters.season);
+  const selectedSeason = seasons.find((season) => season.id === requestedSeasonId)
+    ?? seasons.find((season) => season.is_active)
+    ?? seasons[0];
+  const historicalSeasonId = selectedSeason?.is_active ? undefined : selectedSeason?.id;
+  const { data, error } = selectedSeason
+    ? await supabase.rpc("get_leaderboard", { p_mode: leaderboardModeParameter(mode), p_season_id: selectedSeason.id })
+    : { data: null, error: seasonsResult.error };
   const entries = (data ?? []) as LeaderboardEntry[];
   const podium = entries.slice(0, 3);
 
@@ -52,16 +81,24 @@ export default async function LeaderboardPage({ searchParams }: LeaderboardPageP
       <Link href="/" className="text-sm font-bold text-[var(--muted)]">← Accueil</Link>
 
       <header className="mt-10">
-        <p className="text-sm font-bold uppercase tracking-[0.22em] text-[var(--accent)]">Saison actuelle</p>
+        <p className="text-sm font-bold uppercase tracking-[0.22em] text-[var(--accent)]">{selectedSeason?.is_active ? "Saison actuelle" : "Archives"}</p>
         <h1 className="mt-2 text-4xl font-black tracking-tight">Classement</h1>
-        <p className="mt-3 text-[var(--muted)]">Seuls les matchs confirmés comptent dans les statistiques.</p>
+        <p className="mt-3 text-[var(--muted)]">{selectedSeason ? `Année civile ${selectedSeason.name} · seuls les matchs confirmés comptent.` : "Seuls les matchs confirmés comptent dans les statistiques."}</p>
       </header>
+
+      {seasons.length > 1 ? (
+        <nav className="mt-6 flex gap-2 overflow-x-auto pb-1" aria-label="Saison du classement">
+          {seasons.map((season) => (
+            <Link key={season.id} href={leaderboardHref(mode, season.is_active ? undefined : season.id)} aria-current={season.id === selectedSeason?.id ? "page" : undefined} className={`shrink-0 rounded-full px-4 py-2 text-sm font-bold ${season.id === selectedSeason?.id ? "bg-white text-black" : "bg-[var(--surface)] text-[var(--muted)]"}`}>{season.name}</Link>
+          ))}
+        </nav>
+      ) : null}
 
       <nav className="mt-6 grid grid-cols-3 gap-2 rounded-2xl bg-[var(--surface)] p-1.5" aria-label="Mode du classement">
         {MODE_TABS.map((tab) => (
           <Link
             key={tab.mode}
-            href={tab.href}
+            href={leaderboardHref(tab.mode, historicalSeasonId)}
             aria-current={mode === tab.mode ? "page" : undefined}
             className={`grid min-h-11 place-items-center rounded-xl px-2 text-center text-sm font-bold ${mode === tab.mode ? "bg-[var(--accent)] text-[var(--accent-contrast)]" : "text-[var(--muted)]"}`}
           >
