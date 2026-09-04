@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 type MenuLinkProps = {
+  badge?: string;
   compact?: boolean;
   detail?: string;
   href: string;
@@ -8,7 +9,7 @@ type MenuLinkProps = {
   label: string;
 };
 
-export function MenuLink({ compact = false, detail, href, icon, label }: MenuLinkProps) {
+export function MenuLink({ badge, compact = false, detail, href, icon, label }: MenuLinkProps) {
   if (compact) {
     return (
       <Link
@@ -38,7 +39,8 @@ export function MenuLink({ compact = false, detail, href, icon, label }: MenuLin
         <span className="block font-bold">{label}</span>
         {detail ? <span className="mt-1 block text-sm text-[var(--muted)]">{detail}</span> : null}
       </span>
-      <span aria-hidden="true" className="ml-auto grid size-9 place-items-center rounded-full bg-[var(--surface-raised)] text-xl text-[var(--muted)] transition group-hover:translate-x-0.5 group-hover:text-white">
+      {badge ? <span aria-label={`${badge} invitation${badge === "1" ? "" : "s"} en attente`} className="ml-auto grid min-h-8 min-w-8 place-items-center rounded-full bg-[var(--accent)] px-2 text-xs font-black text-[var(--accent-contrast)]">{badge}</span> : null}
+      <span aria-hidden="true" className={`${badge ? "" : "ml-auto"} grid size-9 place-items-center rounded-full bg-[var(--surface-raised)] text-xl text-[var(--muted)] transition group-hover:translate-x-0.5 group-hover:text-white`}>
         ›
       </span>
     </Link>

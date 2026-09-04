@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { BrandLogo } from "@/components/brand-logo";
+import { ChallengeInboxLink } from "@/components/challenge-inbox-link";
 import { MenuLink } from "@/components/menu-link";
 import { ACTIVE_MATCH_STATUSES, activeMatchAction, type ActiveMatchStatus } from "@/lib/match-status";
 import { createClient } from "@/lib/supabase/server";
@@ -47,8 +48,25 @@ async function getIsAdmin(): Promise<boolean> {
   }
 }
 
+async function getPendingChallengeCount(): Promise<number> {
+  try {
+    const supabase = await createClient();
+    const { data: auth } = await supabase.auth.getUser();
+    if (!auth.user) return 0;
+
+    const { data, error } = await supabase.rpc("get_my_pending_challenge_count");
+    return error ? 0 : Number(data ?? 0);
+  } catch {
+    return 0;
+  }
+}
+
 export default async function HomePage() {
-  const [activeMatch, isAdmin] = await Promise.all([getActiveMatch(), getIsAdmin()]);
+  const [activeMatch, isAdmin, pendingChallengeCount] = await Promise.all([
+    getActiveMatch(),
+    getIsAdmin(),
+    getPendingChallengeCount(),
+  ]);
 
   return (
     <div className="home-dashboard flex min-h-[calc(100dvh-4rem)] flex-col lg:grid lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:content-center lg:gap-x-14 lg:gap-y-6">
@@ -93,7 +111,7 @@ export default async function HomePage() {
           </span>
         </Link>
         <MenuLink href="/join" label="Rejoindre un match" detail="Scanner un QR code" icon="▦" />
-        <MenuLink href="/challenges" label="Défis reçus" detail="Voir les invitations privées" icon="⚔" />
+        <ChallengeInboxLink initialCount={pendingChallengeCount} />
       </section>
 
       <nav className={`mt-auto grid ${isAdmin ? "grid-cols-5" : "grid-cols-4"} gap-1 rounded-3xl border border-white/5 bg-[var(--surface)]/90 p-2 shadow-[0_18px_45px_rgb(0_0_0_/_22%)] backdrop-blur lg:col-start-2 lg:mt-0`} aria-label="Navigation principale">
