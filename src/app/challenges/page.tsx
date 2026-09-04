@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { ReceivedChallengeActions, WithdrawChallengeButton } from "@/components/challenge-actions";
+import { ChallengeNotificationToggle } from "@/components/challenge-notification-manager";
 import { createClient } from "@/lib/supabase/server";
 
 type PendingChallenge = {
@@ -51,6 +52,8 @@ export default async function ChallengesPage() {
         <h1 className="mt-2 text-4xl font-black tracking-tight">Défis reçus</h1>
         <p className="mt-3 text-[var(--muted)]">Gère les duels que tu as reçus ou envoyés.</p>
       </header>
+
+      <ChallengeNotificationToggle />
 
       {error ? (
         <section className="mt-8 rounded-3xl border border-red-400/20 bg-red-400/10 p-5"><h2 className="font-black text-red-200">Défis indisponibles</h2><p className="mt-2 text-sm text-red-200/70">La migration de la boîte de réception doit être appliquée dans Supabase.</p></section>

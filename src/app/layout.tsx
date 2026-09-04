@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 
+import { ChallengeNotificationManager } from "@/components/challenge-notification-manager";
 import { PwaManager } from "@/components/pwa-manager";
 
 import "./globals.css";
@@ -37,6 +38,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
     <html lang="fr">
       <body>
         <PwaManager />
+        <ChallengeNotificationManager />
         <main className="app-shell mx-auto min-h-dvh w-full max-w-6xl px-4 pb-[max(2.5rem,env(safe-area-inset-bottom))] pt-[max(1.5rem,env(safe-area-inset-top))] sm:px-6 sm:pt-8">
           {children}
         </main>
